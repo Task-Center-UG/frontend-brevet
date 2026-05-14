@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
+import { TFeedback } from "@/components/(dashboard)/umpan-balik/_types/umpan-balik-type";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { usePatchData } from "@/hooks/use-patch-data";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -25,7 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TFeedback } from "@/components/(dashboard)/umpan-balik/_types/umpan-balik-type";
+import { Textarea } from "@/components/ui/textarea";
+import { usePatchData } from "@/hooks/use-patch-data";
 
 const schema = z.object({
   rating: z.string().min(1, "Pilih rating"),
@@ -62,7 +63,8 @@ export function UmpanBalikUpdateDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="gap-2 rounded-full">
+          <Pencil className="size-4 shrink-0" />
           Ubah
         </Button>
       </DialogTrigger>
@@ -77,34 +79,36 @@ export function UmpanBalikUpdateDialog({
         <form
           className="space-y-4"
           onSubmit={form.handleSubmit(async (values) => {
-            const payload = {
-              rating: Number(values.rating),
-              title: values.title,
-              description: values.description || undefined,
-            };
-            patchMutation.mutate(payload, {
-              onSuccess: () => {
-                setOpen(false);
-                onSuccess?.();
+            patchMutation.mutate(
+              {
+                rating: Number(values.rating),
+                title: values.title,
+                description: values.description || undefined,
               },
-            });
+              {
+                onSuccess: () => {
+                  setOpen(false);
+                  onSuccess?.();
+                },
+              },
+            );
           })}
         >
           <div className="grid gap-2">
             <label className="text-sm font-medium">Rating</label>
             <Select
               value={form.watch("rating")}
-              onValueChange={(v) =>
-                form.setValue("rating", v, { shouldValidate: true })
+              onValueChange={(value) =>
+                form.setValue("rating", value, { shouldValidate: true })
               }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Pilih rating" />
               </SelectTrigger>
               <SelectContent>
-                {[5, 4, 3, 2, 1].map((r) => (
-                  <SelectItem key={r} value={String(r)}>
-                    {"★".repeat(r)}
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <SelectItem key={rating} value={String(rating)}>
+                    {rating} bintang
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -129,8 +133,8 @@ export function UmpanBalikUpdateDialog({
             >
               Batal
             </Button>
-            <Button variant={"orange"} type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Menyimpan…" : "Simpan Perubahan"}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
           </DialogFooter>
         </form>

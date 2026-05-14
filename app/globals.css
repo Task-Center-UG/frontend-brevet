@@ -11,7 +11,7 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --color-brand-orange: #f97316;
   --color-brand-orange-dark: #ea580c;
-  --color-brand-purple: #54458C;
+  --color-brand-purple: #54458c;
   --color-brand-purple-dark: #2a176f;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -128,65 +128,210 @@
   }
 }
 
-/* Reset agar semua elemen pakai style default browser */
-.prose * {
-  all: revert;
+/* Rich content from editors / dangerouslySetInnerHTML */
+.prose {
+  max-width: 72ch;
+  color: color-mix(in oklch, var(--foreground) 84%, var(--background));
+  font-size: 1rem;
+  line-height: 1.82;
 }
 
-.prose *:focus,
-.prose *:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
+.prose :where(*:focus, *:focus-visible) {
+  outline: 2px solid color-mix(in oklch, var(--primary) 64%, transparent);
+  outline-offset: 4px;
 }
 
-/* Heading */
-.prose h1,
-.prose h2,
+.prose :where(h1, h2, h3, h4) {
+  margin: 2.25rem 0 0.85rem;
+  color: var(--foreground);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.12;
+  scroll-margin-top: 6rem;
+}
+
+.prose h1 {
+  font-size: 2.25rem;
+}
+
+.prose h2 {
+  font-size: 1.75rem;
+}
+
 .prose h3 {
-  @apply p-3 bg-yellow-500/20 dark:bg-yellow-800 text-yellow-500 w-fit text-lg;
+  font-size: 1.35rem;
 }
 
-/* Blockquote */
-.prose blockquote {
-  @apply border-l-4 pl-4 italic text-muted-foreground border-yellow-400 dark:border-yellow-600;
+.prose h4 {
+  font-size: 1.1rem;
 }
 
-/* Paragraf */
+.prose :where(p, ul, ol, blockquote, table, pre, figure) {
+  margin: 1rem 0;
+}
+
 .prose p {
-  @apply text-gray-800 dark:text-gray-100;
+  color: color-mix(in oklch, var(--foreground) 82%, var(--background));
 }
 
-/* List item */
-.prose ul,
-.prose ol {
-  @apply text-gray-800 dark:text-gray-100 pl-6;
+.prose :where(ul, ol) {
+  padding-left: 1.35rem;
+}
+
+.prose li {
+  margin: 0.45rem 0;
+  padding-left: 0.2rem;
 }
 
 .prose li::marker {
-  @apply text-yellow-500;
+  color: var(--primary);
+  font-weight: 800;
 }
 
-/* Bold & italic */
 .prose strong {
-  @apply text-yellow-600 dark:text-yellow-400;
+  color: var(--foreground);
+  font-weight: 800;
 }
 
 .prose em {
-  @apply text-blue-600 dark:text-blue-400;
+  color: color-mix(in oklch, var(--foreground) 88%, var(--primary));
 }
 
-/* Link */
 .prose a {
-  @apply text-blue-500 underline hover:text-blue-700;
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25rem;
+  transition: color 180ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Code block */
+.prose a:hover {
+  color: var(--brand-orange-dark);
+}
+
+.prose blockquote {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: color-mix(in oklch, var(--primary) 8%, var(--background));
+  padding: 1.1rem 1.25rem;
+  color: var(--foreground);
+  font-style: normal;
+}
+
+.prose blockquote p {
+  margin: 0;
+  color: inherit;
+}
+
+.prose img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  margin: 1.75rem 0;
+  object-fit: cover;
+}
+
+.prose figure {
+  margin: 2rem 0;
+}
+
+.prose figcaption {
+  margin-top: 0.65rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  border-spacing: 0;
+  background: var(--card);
+}
+
+.prose :where(th, td) {
+  border-bottom: 1px solid var(--border);
+  padding: 0.8rem 1rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  color: var(--foreground);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--muted);
+}
+
+.prose tr:last-child :where(th, td) {
+  border-bottom: 0;
+}
+
 .prose pre {
-  @apply bg-gray-100 dark:bg-gray-800 p-4 rounded text-sm overflow-auto;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: color-mix(in oklch, var(--foreground) 7%, var(--background));
+  padding: 1rem;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  line-height: 1.7;
 }
 
 .prose code {
-  @apply bg-gray-200 dark:bg-gray-700 px-1 rounded;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--muted);
+  padding: 0.1rem 0.35rem;
+  color: var(--foreground);
+  font-size: 0.92em;
+}
+
+.prose pre code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.prose hr {
+  height: 1px;
+  border: 0;
+  background: var(--border);
+  margin: 2rem 0;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+.prose.prose-sm {
+  font-size: 0.92rem;
+  line-height: 1.72;
+}
+
+@media (min-width: 768px) {
+  .prose h1 {
+    font-size: 3rem;
+  }
+
+  .prose h2 {
+    font-size: 2.2rem;
+  }
+
+  .prose h3 {
+    font-size: 1.55rem;
+  }
 }
 /* Custom Scrollbar: warna ungu tua #2a176f */
 ::-webkit-scrollbar {

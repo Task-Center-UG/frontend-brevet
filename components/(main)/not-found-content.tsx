@@ -1,30 +1,41 @@
 "use client";
 
-import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import type { ReactNode } from "react";
+import { SearchX } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 type NotFoundContentProps = {
   message?: string;
-  imageSrc?: string;
-  altText?: string;
+  title?: string;
+  icon?: ReactNode;
+  className?: string;
 };
 
 const NotFoundContent = ({
   message = "Data tidak ditemukan.",
-  imageSrc = "/errors/not-found.png",
-  altText = "not-found",
+  title = "Belum ada data",
+  icon,
+  className,
 }: NotFoundContentProps) => {
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-6 py-5">
-      <ImageWithFallback
-        src={imageSrc}
-        alt={altText}
-        width={1000}
-        height={1000}
-        className="w-[30rem] max-w-full"
-      />
-      <p className="text-center text-lg text-muted-foreground font-medium">
-        {message}
-      </p>
+    <div
+      className={cn(
+        "flex w-full flex-col items-center justify-center gap-5 rounded-xl border bg-card px-6 py-12 text-center",
+        className,
+      )}
+    >
+      <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+        {icon ?? <SearchX className="size-7" />}
+      </div>
+      <div className="max-w-md">
+        <h2 className="text-2xl font-extrabold tracking-normal text-foreground">
+          {title}
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          {message}
+        </p>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
 import { useDeleteData } from "@/hooks/use-delete-data";
 
 export function UmpanBalikDeleteDialog({
@@ -44,9 +45,13 @@ export function UmpanBalikDeleteDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="destructive" className="h-8 px-2">
-          <Trash2 className="h-4 w-4 text-white" />
-          <span className="sr-only">Hapus</span>
+        <Button
+          variant="destructive"
+          size="sm"
+          className="rounded-full text-white"
+        >
+          <Trash2 data-icon="inline-start" />
+          Hapus
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[420px]">
@@ -67,7 +72,7 @@ export function UmpanBalikDeleteDialog({
             onClick={onDelete}
             disabled={del.isPending}
           >
-            {del.isPending ? "Menghapus…" : "Hapus"}
+            {del.isPending ? "Menghapus..." : "Hapus"}
           </Button>
         </DialogFooter>
       </DialogContent>

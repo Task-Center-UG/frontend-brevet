@@ -14,15 +14,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertCircle,
   CheckCircle2,
@@ -36,10 +31,14 @@ import {
   Share2,
   FileDown,
   Copy,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useGetData } from "@/hooks/use-get-data";
 import { CertificateAPI } from "./_types/certificate-type";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 const schema = z.object({
   certificateNo: z
@@ -50,10 +49,13 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
+const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 function isDefaultDate(d?: string | null) {
   if (!d) return true;
   return d.startsWith("0001-01-01");
 }
+
 function formatDate(d?: string | null) {
   if (!d || isDefaultDate(d)) return "-";
   const date = new Date(d);
@@ -64,33 +66,66 @@ function formatDate(d?: string | null) {
     year: "numeric",
   });
 }
-function StatusPill({
+
+const statusMeta: Record<
+  NonNullable<CertificateAPI["status"]>,
+  { label: string; className: string }
+> = {
+  valid: {
+    label: "Sertifikat valid",
+    className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-700",
+  },
+  expired: {
+    label: "Sudah expired",
+    className: "border-amber-500/20 bg-amber-500/10 text-amber-700",
+  },
+  revoked: {
+    label: "Dicabut",
+    className: "border-destructive/20 bg-destructive/10 text-destructive",
+  },
+  "not-found": {
+    label: "Tidak ditemukan",
+    className: "border-muted bg-muted text-muted-foreground",
+  },
+};
+
+function StatusBadge({
   status,
 }: {
   status: NonNullable<CertificateAPI["status"]>;
 }) {
-  if (status === "valid")
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-        <CheckCircle2 className="h-4 w-4" /> Sertifikat Valid
-      </span>
-    );
-  if (status === "expired")
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">
-        <AlertCircle className="h-4 w-4" /> Sudah Expired
-      </span>
-    );
-  if (status === "revoked")
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-        <AlertCircle className="h-4 w-4" /> Dicabut
-      </span>
-    );
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700">
-      <AlertCircle className="h-4 w-4" /> Tidak Ditemukan
-    </span>
+    <Badge
+      variant="outline"
+      className={cn("rounded-full px-3 py-1", statusMeta[status].className)}
+    >
+      {status === "valid" ? <CheckCircle2 /> : <AlertCircle />}
+      {statusMeta[status].label}
+    </Badge>
+  );
+}
+
+function ResultLine({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Icon className="size-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <div className="mt-1 break-words text-sm font-semibold leading-6 text-foreground">
+          {value}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -132,6 +167,7 @@ export default function ValidasiSertifikat() {
       toast("Berhasil!", { description: "Pemeriksaan berhasil." });
     }
   }, [isSuccess, queryNo]);
+
   React.useEffect(() => {
     if (isError && queryNo) {
       setErrorMsg("Sertifikat tidak ditemukan atau terjadi kesalahan.");
@@ -146,6 +182,7 @@ export default function ValidasiSertifikat() {
   function notify(successMessage: string) {
     toast("Berhasil!", { description: successMessage });
   }
+
   async function handleCopy(text: string, successMsg: string) {
     try {
       await navigator.clipboard.writeText(text);
@@ -154,6 +191,7 @@ export default function ValidasiSertifikat() {
       toast("Gagal!", { description: "Tidak bisa menyalin ke clipboard." });
     }
   }
+
   async function handleShare(num?: string) {
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
     const title = "Validasi Sertifikat Brevet";
@@ -180,164 +218,165 @@ export default function ValidasiSertifikat() {
   const hasResult = Boolean(cert) || (isError && lastSubmittedNo);
 
   return (
-    <section className="w-full py-24 md:py-32 dark:bg-background transition-colors">
-      <div className="max-w-screen-xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
-        <div className="space-y-6">
-          <div>
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#f97316]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#f97316]" />
+    <section className="w-full overflow-hidden bg-background text-foreground">
+      <div className="relative border-b bg-[linear-gradient(135deg,oklch(0.985_0.006_78),oklch(0.955_0.01_86))] dark:bg-[linear-gradient(135deg,oklch(0.16_0.012_285),oklch(0.21_0.014_285))]">
+        <div className="mx-auto grid max-w-screen-xl gap-10 px-6 pb-16 pt-16 md:pb-20 md:pt-24 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
+          <motion.div
+            className="flex max-w-4xl flex-col gap-6"
+            initial={{ opacity: 0, y: 34 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: easeOutExpo }}
+          >
+            <Badge variant="outline" className="w-fit rounded-full border-primary/20 bg-primary/10 px-3 py-1 text-primary">
+              <ShieldCheck />
               Verifikasi Keaslian
-            </span>
-            <h1 className="mt-4 text-4xl md:text-5xl font-extrabold tracking-tight !leading-[1.1]">
-              Validasi{" "}
-              <span className="text-muted-foreground">Sertifikat</span>
+            </Badge>
+            <h1 className="text-[2.75rem] font-extrabold leading-[0.98] tracking-normal md:text-[4.5rem] lg:text-[5.5rem]">
+              Validasi Sertifikat
             </h1>
-          </div>
-          <p className="text-muted-foreground leading-relaxed">
-            Masukkan <span className="font-medium">nomor sertifikat</span> untuk
-            memeriksa keaslian dan statusnya.
-          </p>
+            <p className="max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+              Masukkan nomor sertifikat untuk memeriksa status, pemilik, program, dan tautan dokumen resmi Tax Center Gunadarma.
+            </p>
+          </motion.div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="certificateNo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nomor Sertifikat</FormLabel>
-                    <FormControl>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="cth: BREV-UG-2025-ABC123"
-                          {...field}
-                        />
-                        <Button
-                          type="submit"
-                          variant="orange"
-                          disabled={isSubmitting}
-                          className="rounded-full"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Memeriksa
-                            </>
-                          ) : (
-                            <>
-                              <Search className="mr-2 h-4 w-4" />
-                              Cek
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
-
-          {errorMsg && (
-            <div className="flex items-center gap-2 text-red-600 text-sm">
-              <AlertCircle className="h-4 w-4" />
-              {errorMsg}
-            </div>
-          )}
+          <motion.div
+            className="rounded-xl border bg-card p-5 shadow-xl shadow-primary/8"
+            initial={{ opacity: 0, y: 34 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: easeOutExpo }}
+          >
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="certificateNo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nomor Sertifikat</FormLabel>
+                      <FormControl>
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                          <Input
+                            placeholder="cth: BREV-UG-2025-ABC123"
+                            className="h-12 rounded-full"
+                            {...field}
+                          />
+                          <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="h-12 rounded-full px-6"
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 data-icon="inline-start" className="animate-spin" />
+                                Memeriksa
+                              </>
+                            ) : (
+                              <>
+                                <Search data-icon="inline-start" />
+                                Cek
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </motion.div>
         </div>
+      </div>
 
-        <div className="md:sticky md:top-20 h-fit p-6 border rounded-2xl bg-card shadow-sm">
+      <div className="mx-auto grid max-w-screen-xl gap-10 px-6 py-16 lg:grid-cols-[360px_minmax(0,1fr)] lg:py-24">
+        <aside className="lg:sticky lg:top-24 lg:h-fit">
+          <div className="rounded-xl border bg-card p-5">
+            <Sparkles className="size-5 text-primary" />
+            <h2 className="mt-4 text-2xl font-extrabold">Cara membaca hasil</h2>
+            <Separator className="my-5" />
+            <div className="flex flex-col gap-4 text-sm leading-6 text-muted-foreground">
+              <p>Status valid berarti nomor sertifikat cocok dengan data resmi sistem.</p>
+              <p>Jika data tidak ditemukan, periksa kembali nomor sertifikat atau hubungi Tax Center.</p>
+            </div>
+          </div>
+        </aside>
+
+        <motion.div
+          className="min-h-[360px] rounded-xl border bg-card p-6 shadow-xl shadow-primary/6 md:p-8"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-80px" }}
+          transition={{ duration: 0.6, ease: easeOutExpo }}
+        >
           {!hasResult && !showSkeleton && (
-            <div className="text-muted-foreground text-sm">
-              Hasil validasi akan muncul di sini.
+            <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 text-center">
+              <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <IdCard className="size-7" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-extrabold">Hasil validasi muncul di sini.</h2>
+                <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+                  Masukkan nomor sertifikat dari dokumen atau QR verification untuk memulai pemeriksaan.
+                </p>
+              </div>
             </div>
           )}
 
           {showSkeleton && (
-            <div className="space-y-3">
-              <Skeleton className="h-6 w-1/3 rounded" />
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-7 w-44 rounded-full" />
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-40" />
-                </div>
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
               ))}
             </div>
           )}
 
-          {hasResult && (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead
-                      colSpan={2}
-                      className="text-2xl font-semibold text-primary"
-                    >
-                      Hasil Validasi
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="flex items-center gap-2 font-medium text-muted-foreground">
-                      <IdCard className="h-4 w-4 text-orange-500" />
-                      Nomor / ID Sertifikat
-                    </TableCell>
-                    <TableCell className="break-all">{number}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="flex items-center gap-2 font-medium text-muted-foreground">
-                      <User className="h-4 w-4 text-orange-500" />
-                      Peserta
-                    </TableCell>
-                    <TableCell>{participantName}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="flex items-center gap-2 font-medium text-muted-foreground">
-                      <BookOpen className="h-4 w-4 text-orange-500" />
-                      Kursus
-                    </TableCell>
-                    <TableCell>{courseTitle}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="flex items-center gap-2 font-medium text-muted-foreground">
-                      <CalendarDays className="h-4 w-4 text-orange-500" />
-                      Terbit
-                    </TableCell>
-                    <TableCell>{issuedAt}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+          {errorMsg && !showSkeleton && (
+            <Alert className="mb-5 border-destructive/20 bg-destructive/5">
+              <AlertCircle />
+              <AlertTitle>Validasi gagal</AlertTitle>
+              <AlertDescription>{errorMsg}</AlertDescription>
+            </Alert>
+          )}
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <StatusPill status={status} />
+          {hasResult && !showSkeleton && (
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    Hasil Validasi
+                  </p>
+                  <h2 className="mt-2 text-3xl font-extrabold">Data sertifikat</h2>
+                </div>
+                <StatusBadge status={status} />
+              </div>
 
+              <Separator />
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <ResultLine icon={IdCard} label="Nomor atau ID Sertifikat" value={number} />
+                <ResultLine icon={User} label="Peserta" value={participantName} />
+                <ResultLine icon={BookOpen} label="Kursus" value={courseTitle} />
+                <ResultLine icon={CalendarDays} label="Terbit" value={issuedAt} />
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2">
                 {verifierUrl && (
-                  <Button
-                    asChild
-                    variant="secondary"
-                    onClick={() =>
-                      notify("Membuka / mengunduh sertifikat dalam tab baru.")
-                    }
-                    className="rounded-full"
-                  >
+                  <Button asChild variant="secondary" className="rounded-full">
                     <a href={verifierUrl} target="_blank" rel="noreferrer">
-                      <FileDown className="mr-2 h-4 w-4" />
-                      Lihat / Unduh Sertifikat
+                      <FileDown data-icon="inline-start" />
+                      Lihat Sertifikat
                     </a>
                   </Button>
                 )}
 
                 <Button
                   variant="outline"
-                  onClick={() =>
-                    handleCopy(number, "Nomor sertifikat tersalin.")
-                  }
+                  onClick={() => handleCopy(number, "Nomor sertifikat tersalin.")}
                   className="rounded-full"
                 >
-                  <Copy className="mr-2 h-4 w-4" />
+                  <Copy data-icon="inline-start" />
                   Salin Nomor
                 </Button>
 
@@ -346,7 +385,7 @@ export default function ValidasiSertifikat() {
                   onClick={() => handleShare(number)}
                   className="rounded-full"
                 >
-                  <Share2 className="mr-2 h-4 w-4" />
+                  <Share2 data-icon="inline-start" />
                   Bagikan
                 </Button>
 
@@ -354,20 +393,18 @@ export default function ValidasiSertifikat() {
                   variant="outline"
                   onClick={() => {
                     const shareUrl =
-                      typeof window !== "undefined"
-                        ? window.location.href
-                        : "";
+                      typeof window !== "undefined" ? window.location.href : "";
                     handleCopy(shareUrl, "Tautan halaman tersalin.");
                   }}
                   className="rounded-full"
                 >
-                  <LinkIcon className="mr-2 h-4 w-4" />
-                  Salin Tautan Halaman
+                  <LinkIcon data-icon="inline-start" />
+                  Salin Tautan
                 </Button>
               </div>
-            </>
+            </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

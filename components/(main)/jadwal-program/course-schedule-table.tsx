@@ -20,7 +20,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGetData } from "@/hooks/use-get-data";
 import { Skeleton } from "@/components/ui/skeleton";

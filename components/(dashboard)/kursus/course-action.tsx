@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { Trash2, MoreHorizontal, BookDashed, Route } from "lucide-react";
+import { Trash2, MoreHorizontal, Route } from "lucide-react";
 import Link from "next/link";
 
 type Props = {
@@ -60,12 +60,6 @@ export function CourseAction({ courseId, courseSlug }: Props) {
             <Link href={`/dashboard/kursus/${courseSlug}/builder`}>
               <Route className="mr-2 h-4 w-4 text-blue-600" />
               <span className="text-blue-600">Buka Builder</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={`/dashboard/kursus/${courseSlug}/builder?tab=gelombang`}>
-              <BookDashed className="mr-2 h-4 w-4 text-purple-600" />
-              <span className="text-purple-600">Lihat Gelombang</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

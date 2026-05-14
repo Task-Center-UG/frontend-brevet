@@ -1,37 +1,97 @@
 "use client";
 
-import { useGetData } from "@/hooks/use-get-data";
-import { usePostData } from "@/hooks/use-post-data";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { TCourseBatch } from "@/components/(dashboard)/kursus/gelombang/_types/course-batch-type";
-import NotFoundContent from "../not-found-content";
-import { DAY_OPTIONS } from "@/components/(dashboard)/kursus/gelombang/_constants/day-options";
+import type { ElementType, ReactNode } from "react";
 import Link from "next/link";
 import {
-  CalendarDays,
-  ListTodo,
-  Clock,
-  MapPin,
-  Users,
-  UserCheck,
-  Globe,
-  BadgeInfo,
-} from "lucide-react";
-import {
-  isWithinInterval,
-  isBefore,
-  isAfter,
-  differenceInCalendarDays,
   format,
+  differenceInCalendarDays,
+  isAfter,
+  isBefore,
+  isWithinInterval,
 } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { Notice } from "@/components/notice";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  BadgeInfo,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  Globe,
+  Info,
+  ListTodo,
+  MapPin,
+  ShieldCheck,
+  Sparkles,
+  UserCheck,
+  Users,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { DAY_OPTIONS } from "@/components/(dashboard)/kursus/gelombang/_constants/day-options";
+import { TCourseBatch } from "@/components/(dashboard)/kursus/gelombang/_types/course-batch-type";
+import NotFoundContent from "../not-found-content";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetData } from "@/hooks/use-get-data";
+import { usePostData } from "@/hooks/use-post-data";
+import { cn } from "@/lib/utils";
 
 type Props = {
   batchSlug: string;
+};
+
+type RegStatus = "open" | "not_yet" | "closed" | "unknown";
+
+const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const groupLabel = (
+  groupType: "mahasiswa_gunadarma" | "mahasiswa_non_gunadarma" | "umum",
+) => {
+  if (groupType === "mahasiswa_gunadarma") return "Mahasiswa Gunadarma";
+  if (groupType === "mahasiswa_non_gunadarma") return "Mahasiswa Non-Gunadarma";
+  return "Umum";
+};
+
+const dayLabel = (day: string) =>
+  DAY_OPTIONS.find((option) => option.value === day)?.label || day;
+
+const statusCopy: Record<
+  RegStatus,
+  { label: string; action: string; tone: string; message: string }
+> = {
+  open: {
+    label: "Pendaftaran dibuka",
+    action: "Bayar & Daftar",
+    tone: "border-primary/20 bg-primary/10 text-primary",
+    message:
+      "Pendaftaran aktif. Lanjutkan pembayaran untuk mengunci kursi di gelombang ini.",
+  },
+  not_yet: {
+    label: "Belum dibuka",
+    action: "Pendaftaran Belum Dibuka",
+    tone: "border-amber-500/20 bg-amber-500/10 text-amber-700",
+    message:
+      "Periode daftar belum mulai. Kamu tetap bisa cek detail jadwal dulu.",
+  },
+  closed: {
+    label: "Pendaftaran ditutup",
+    action: "Pendaftaran Ditutup",
+    tone: "border-muted bg-muted text-muted-foreground",
+    message: "Gelombang ini sudah lewat masa pendaftaran.",
+  },
+  unknown: {
+    label: "Jadwal belum tersedia",
+    action: "Pendaftaran Belum Tersedia",
+    tone: "border-muted bg-muted text-muted-foreground",
+    message: "Tanggal pendaftaran belum tersedia dari sistem.",
+  },
 };
 
 export default function Purchase({ batchSlug }: Props) {
@@ -51,26 +111,35 @@ export default function Purchase({ batchSlug }: Props) {
 
   if (isLoading) {
     return (
-      <div className="max-w-screen-xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-4">
-          <Skeleton className="h-10 w-2/3 rounded" />
-          <Skeleton className="aspect-[16/9] w-full rounded-2xl" />
-          <Skeleton className="h-4 w-1/2" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-2/3" />
+      <section className="w-full bg-background pt-16 md:pt-24">
+        <div className="mx-auto grid max-w-screen-xl gap-10 px-6 pb-24 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="flex flex-col gap-6">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-24 w-full max-w-4xl" />
+            <Skeleton className="h-[520px] w-full rounded-xl" />
+            <div className="grid gap-4 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Skeleton key={index} className="h-32 rounded-xl" />
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border bg-card p-6">
+            <Skeleton className="h-6 w-40" />
+            <div className="mt-6 flex flex-col gap-4">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Skeleton key={index} className="h-12 w-full" />
+              ))}
+            </div>
+            <Skeleton className="mt-6 h-12 w-full rounded-full" />
+          </div>
         </div>
-        <div className="space-y-4">
-          <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-24 w-full" />
-        </div>
-      </div>
+      </section>
     );
   }
 
   if (isError || !batch) {
     return (
-      <div className="max-w-screen-md mx-auto py-16 px-6">
+      <div className="mx-auto max-w-screen-md px-6 py-24">
         <NotFoundContent message="Gelombang tidak ditemukan." />
       </div>
     );
@@ -84,13 +153,15 @@ export default function Purchase({ batchSlug }: Props) {
     ? new Date(batch.registration_end_at)
     : null;
 
-  type RegStatus = "open" | "not_yet" | "closed" | "unknown";
   let regStatus: RegStatus = "unknown";
   if (regStart && regEnd) {
-    if (isWithinInterval(now, { start: regStart, end: regEnd }))
+    if (isWithinInterval(now, { start: regStart, end: regEnd })) {
       regStatus = "open";
-    else if (isBefore(now, regStart)) regStatus = "not_yet";
-    else if (isAfter(now, regEnd)) regStatus = "closed";
+    } else if (isBefore(now, regStart)) {
+      regStatus = "not_yet";
+    } else if (isAfter(now, regEnd)) {
+      regStatus = "closed";
+    }
   }
 
   const daysLeft =
@@ -103,7 +174,7 @@ export default function Purchase({ batchSlug }: Props) {
       ? `${format(regStart, "dd MMM yyyy", { locale: idLocale })} - ${format(
           regEnd,
           "dd MMM yyyy",
-          { locale: idLocale }
+          { locale: idLocale },
         )}`
       : "-";
 
@@ -111,37 +182,61 @@ export default function Purchase({ batchSlug }: Props) {
     locale: idLocale,
   })} - ${format(new Date(batch.end_at), "dd MMM yyyy", { locale: idLocale })}`;
 
-  const dayLabels = batch.days
-    .map((d) => DAY_OPTIONS.find((opt) => opt.value === d.day)?.label || d.day)
-    .join(" & ");
-
+  const dayLabels = batch.days.map((day) => dayLabel(day.day)).join(" & ");
   const timeRange = `${batch.start_time.slice(0, 5).replace(":", ".")} - ${batch.end_time
     .slice(0, 5)
     .replace(":", ".")} WIB`;
-
+  const location =
+    batch.course_type === "online"
+      ? "Online, Zoom atau Google Meet"
+      : batch.room;
   const groupBadges =
-    batch.batch_groups?.map((g) =>
-      g.group_type === "mahasiswa_gunadarma"
-        ? "Mahasiswa Gunadarma"
-        : g.group_type === "mahasiswa_non_gunadarma"
-          ? "Mahasiswa Non-Gunadarma"
-          : "Umum"
-    ) || [];
-
+    batch.batch_groups?.map((group) => groupLabel(group.group_type)) || [];
   const buttonDisabled = regStatus !== "open" || isPending;
-  const buttonLabel =
-    regStatus === "open"
-      ? isPending
-        ? "Memproses..."
-        : "Bayar & Daftar"
-      : regStatus === "not_yet"
-        ? "Pendaftaran Belum Dibuka"
-        : regStatus === "closed"
-          ? "Pendaftaran Ditutup"
-          : "Pendaftaran";
+  const buttonLabel = isPending ? "Memproses..." : statusCopy[regStatus].action;
+
+  const registrationProgress =
+    regStatus === "open" && regStart && regEnd
+      ? Math.min(
+          Math.max(
+            ((now.getTime() - regStart.getTime()) /
+              (regEnd.getTime() - regStart.getTime())) *
+              100,
+            6,
+          ),
+          100,
+        )
+      : regStatus === "closed"
+        ? 100
+        : 0;
+
+  const quickFacts = [
+    {
+      icon: CalendarDays,
+      label: "Periode kelas",
+      value: coursePeriodText,
+    },
+    {
+      icon: Clock,
+      label: "Jam belajar",
+      value: timeRange,
+    },
+    {
+      icon: batch.course_type === "online" ? Globe : MapPin,
+      label: batch.course_type === "online" ? "Platform" : "Lokasi",
+      value: location,
+    },
+  ];
+
+  const processSteps = [
+    "Masuk ke akun LMS Tax Center Gunadarma.",
+    "Klik Bayar & Daftar untuk membuat tagihan.",
+    "Upload bukti transfer dari dashboard pembayaran.",
+    "Admin memverifikasi, akses kelas aktif setelah valid.",
+  ];
 
   const handlePurchase = () => {
-    if (!batch?.id) return toast.error("Batch tidak ditemukan.");
+    if (!batch.id) return toast.error("Batch tidak ditemukan.");
     if (regStatus !== "open") {
       return toast.warning("Pendaftaran belum tersedia untuk gelombang ini.");
     }
@@ -149,228 +244,363 @@ export default function Purchase({ batchSlug }: Props) {
   };
 
   return (
-    <div className="w-full">
-      <div className="w-full bg-background">
-        <div className="relative mx-auto max-w-screen-xl rounded-none md:rounded-xl overflow-hidden">
-          <div className="relative aspect-[16/9] w-full">
+    <section className="w-full overflow-hidden bg-background text-foreground">
+      <div className="relative border-b bg-[linear-gradient(135deg,oklch(0.985_0.006_78),oklch(0.955_0.01_86))] dark:bg-[linear-gradient(135deg,oklch(0.16_0.012_285),oklch(0.21_0.014_285))]">
+        <div className="absolute inset-x-0 top-0 h-px bg-primary/40" />
+        <div className="mx-auto flex max-w-screen-xl flex-col gap-10 px-6 pb-16 pt-16 md:pb-20 md:pt-24">
+          <motion.div
+            className="flex flex-col gap-7"
+            initial={{ opacity: 0, y: 34 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: easeOutExpo }}
+          >
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge
+                variant="outline"
+                className={cn(
+                  "rounded-full border px-3 py-1",
+                  statusCopy[regStatus].tone,
+                )}
+              >
+                <Sparkles />
+                {statusCopy[regStatus].label}
+              </Badge>
+              <Badge variant="secondary" className="rounded-full px-3 py-1">
+                {batch.course_type === "online" ? "Online" : "Offline"}
+              </Badge>
+              {groupBadges.slice(0, 3).map((badge) => (
+                <Badge
+                  key={badge}
+                  variant="secondary"
+                  className="rounded-full px-3 py-1"
+                >
+                  {badge}
+                </Badge>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                Pembayaran Program
+              </p>
+              <h1 className="max-w-6xl text-[2.7rem] font-extrabold leading-[0.98] tracking-normal text-foreground md:text-[4.5rem] lg:text-[5.8rem]">
+                {batch.title}
+              </h1>
+              <p className="max-w-3xl text-base leading-8 text-muted-foreground md:text-lg">
+                Cek ulang jadwal, format kelas, dan periode pendaftaran sebelum
+                membuat tagihan.
+              </p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="relative min-h-[360px] overflow-hidden rounded-xl border bg-muted shadow-2xl shadow-primary/10 md:min-h-[520px] lg:min-h-[620px]"
+            initial={{ opacity: 0, y: 38, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.82, delay: 0.08, ease: easeOutExpo }}
+          >
             <ImageWithFallback
               src={batch.batch_thumbnail || "/placeholder.svg"}
               alt={batch.title}
               fill
-              className="object-cover"
               priority
+              className="object-cover transition duration-700 hover:scale-[1.04]"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex flex-col gap-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-1 rounded-full text-xs md:text-sm bg-white/90 text-gray-800">
-                  {batch.course_type === "online" ? "Online" : "Offline"}
-                </span>
-                {groupBadges.map((b, i) => (
-                  <span
-                    key={i}
-                    className="px-2.5 py-1 rounded-full text-xs md:text-sm bg-orange-100 text-orange-700"
-                  >
-                    {b}
-                  </span>
-                ))}
+            <div className="absolute inset-0 bg-linear-to-t from-foreground/70 via-foreground/10 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-5 p-5 text-background md:p-8 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
+                  Review sebelum bayar
+                </p>
+                <p className="mt-2 text-2xl font-extrabold leading-tight md:text-4xl">
+                  {regPeriodText}
+                </p>
               </div>
-              <h1 className="text-white text-2xl md:text-4xl font-bold drop-shadow">
-                {batch.title}
-              </h1>
+              <div className="grid gap-3 md:grid-cols-3 lg:w-[680px]">
+                {quickFacts.map((item, index) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.div
+                      key={item.label}
+                      className="group flex min-h-28 flex-col justify-between rounded-xl border border-background/18 bg-background/92 p-4 text-foreground shadow-lg transition duration-300 hover:-translate-y-1 hover:border-primary/40"
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.55,
+                        delay: 0.16 + index * 0.08,
+                        ease: easeOutExpo,
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {item.label}
+                        </span>
+                        <Icon className="size-4 text-primary transition-transform duration-300 group-hover:rotate-6" />
+                      </div>
+                      <p className="text-sm font-semibold leading-6">
+                        {item.value}
+                      </p>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      <div className="max-w-screen-xl mx-auto px-6 md:px-12 py-10 grid grid-cols-1 md:grid-cols-3 gap-10">
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-card rounded-2xl shadow-sm border p-6">
-            <h2 className="text-xl font-semibold mb-4">Rincian Gelombang</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <InfoRow
-                icon={<CalendarDays className="h-4 w-4" />}
-                label="Periode Pelaksanaan"
-                value={coursePeriodText}
-              />
-              <InfoRow
-                icon={<ListTodo className="h-4 w-4" />}
-                label="Hari"
-                value={dayLabels || "-"}
-              />
-              <InfoRow
-                icon={<Clock className="h-4 w-4" />}
-                label="Jam"
-                value={timeRange}
-              />
-              <InfoRow
-                icon={
-                  batch.course_type === "online" ? (
-                    <Globe className="h-4 w-4" />
-                  ) : (
-                    <MapPin className="h-4 w-4" />
-                  )
-                }
-                label={batch.course_type === "online" ? "Platform" : "Lokasi"}
-                value={
-                  batch.course_type === "online"
-                    ? "Online (Zoom/Google Meet)"
-                    : batch.room
-                }
-              />
-              <InfoRow
-                icon={<Users className="h-4 w-4" />}
-                label="Kapasitas"
-                value={`${batch.quota} Peserta`}
-              />
-              <InfoRow
-                icon={<UserCheck className="h-4 w-4" />}
-                label="Jenis Peserta"
-                value={groupBadges.length ? groupBadges.join(", ") : "-"}
-              />
-            </div>
-          </div>
-          <div className="bg-card rounded-2xl shadow-sm border p-6">
-            <h2 className="text-xl font-semibold mb-4">Pendaftaran</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <InfoRow
-                icon={<CalendarDays className="h-4 w-4" />}
-                label="Periode Pendaftaran"
-                value={regPeriodText}
-              />
-              <InfoRow
-                icon={<BadgeInfo className="h-4 w-4" />}
-                label="Status"
-                value={
-                  regStatus === "open"
-                    ? "Dibuka"
-                    : regStatus === "not_yet"
-                      ? "Belum dibuka"
-                      : regStatus === "closed"
-                        ? "Ditutup"
-                        : "-"
-                }
-                badgeColor={
-                  regStatus === "open"
-                    ? "bg-green-100 text-green-700"
-                    : regStatus === "not_yet"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : regStatus === "closed"
-                        ? "bg-gray-200 text-gray-700"
-                        : "bg-muted text-muted-foreground"
-                }
-              />
-              {typeof daysLeft === "number" && (
-                <InfoRow
-                  icon={<Clock className="h-4 w-4" />}
-                  label="Sisa Waktu"
-                  value={`${daysLeft} hari`}
-                />
-              )}
-            </div>
-
-            {regStatus === "open" ? (
-              <Notice
-                tone="success"
-                text={
-                  typeof daysLeft === "number" && daysLeft > 0
-                    ? `Pendaftaran sedang dibuka. Sisa waktu ${daysLeft} hari.`
-                    : "Pendaftaran sedang dibuka. Yuk daftar sekarang!"
-                }
-              />
-            ) : regStatus === "not_yet" ? (
-              <Notice
-                tone="warning"
-                text={`Pendaftaran akan dibuka pada ${
-                  regStart
-                    ? format(regStart, "dd MMM yyyy", { locale: idLocale })
-                    : "-"
-                }.`}
-              />
-            ) : regStatus === "closed" ? (
-              <Notice
-                tone="neutral"
-                text="Pendaftaran gelombang ini sudah ditutup."
-              />
-            ) : null}
-          </div>
-          <Notice
-            tone="warningSoft"
-            text={
-              <span>
-                <strong>Tanggal mulai bersifat tentatif.</strong> Jadwal dapat
-                berubah tergantung pada jumlah peserta yang mendaftar pada
-                gelombang ini. Silakan daftar lebih awal untuk mengamankan
-                tempat Kamu.
-              </span>
-            }
-          />
-        </div>
-        <aside className="bg-card rounded-2xl border shadow-sm p-6 h-fit sticky top-24">
-          <h2 className="text-lg font-semibold text-foreground">
-            Konfirmasi Pendaftaran
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tekan <strong>Bayar &amp; Daftar</strong> untuk melanjutkan.
-          </p>
-
-          <div className="mt-4 text-sm text-muted-foreground space-y-1">
-            <p>
-              <strong>Kuota Maksimal:</strong> {batch.quota}
-            </p>
-            <p>
-              <strong>Ketersediaan:</strong> Tidak tersedia real-time
-            </p>
-          </div>
-
-          <Button
-            variant="orange"
-            onClick={handlePurchase}
-            disabled={buttonDisabled}
-            size="lg"
-            className="w-full mt-5 rounded-full"
+      <div className="mx-auto grid max-w-screen-xl gap-10 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_380px] lg:py-24">
+        <main className="flex min-w-0 flex-col gap-10">
+          <motion.section
+            className="grid gap-4 md:grid-cols-3"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: easeOutExpo }}
           >
-            {buttonLabel}
-          </Button>
+            <StatCard
+              icon={CalendarDays}
+              label="Pelaksanaan"
+              value={coursePeriodText}
+              index={1}
+            />
+            <StatCard
+              icon={ListTodo}
+              label="Hari kelas"
+              value={dayLabels || "-"}
+              index={2}
+            />
+            <StatCard
+              icon={Users}
+              label="Kuota"
+              value={`${batch.quota} peserta`}
+              index={3}
+            />
+          </motion.section>
 
-          {regStatus !== "open" && (
-            <Button variant="outline" asChild size="sm" className="w-full mt-3 rounded-full">
-              <Link href={`/kursus/${batch.slug}`}>Lihat Detail Gelombang</Link>
-            </Button>
-          )}
+          <motion.section
+            className="rounded-xl border bg-card p-6 shadow-sm md:p-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: easeOutExpo }}
+          >
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  Rincian Pendaftaran
+                </p>
+                <h2 className="text-3xl font-extrabold leading-tight md:text-5xl">
+                  Pastikan data gelombang sudah cocok.
+                </h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <InfoRow
+                  icon={CalendarDays}
+                  label="Periode daftar"
+                  value={regPeriodText}
+                />
+                <InfoRow
+                  icon={BadgeInfo}
+                  label="Status"
+                  value={statusCopy[regStatus].label}
+                />
+                <InfoRow icon={Clock} label="Jam kelas" value={timeRange} />
+                <InfoRow
+                  icon={batch.course_type === "online" ? Globe : MapPin}
+                  label={batch.course_type === "online" ? "Platform" : "Lokasi"}
+                  value={location}
+                />
+              </div>
+            </div>
+          </motion.section>
+
+          <motion.section
+            className="relative overflow-hidden rounded-xl border bg-[#2a176f] p-6 text-white md:p-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: easeOutExpo }}
+          >
+            <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-end">
+              <div className="flex flex-col gap-4">
+                <Badge className="w-fit rounded-full bg-white/12 px-3 py-1 text-white">
+                  <ShieldCheck />
+                  Alur Resmi LMS
+                </Badge>
+                <h2 className="text-3xl font-extrabold leading-tight md:text-4xl">
+                  Bayar sekali, verifikasi rapi, akses kelas terbuka.
+                </h2>
+              </div>
+              <div className="grid gap-3">
+                {processSteps.map((step, index) => (
+                  <motion.div
+                    key={step}
+                    className="flex items-start gap-3 rounded-lg border border-white/15 bg-white/8 p-3"
+                    whileHover={{ x: 4 }}
+                    transition={{ duration: 0.22, ease: easeOutExpo }}
+                  >
+                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-extrabold text-[#2a176f]">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm leading-6 text-white/86">{step}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
+
+          <Alert className="border-primary/20 bg-primary/5">
+            <Info />
+            <AlertTitle>Catatan jadwal</AlertTitle>
+            <AlertDescription>
+              Tanggal mulai bersifat tentatif dan dapat menyesuaikan jumlah
+              peserta terdaftar. Daftar lebih awal untuk mengamankan kursi.
+            </AlertDescription>
+          </Alert>
+        </main>
+
+        <aside className="lg:sticky lg:top-24 lg:h-fit">
+          <motion.div
+            className="overflow-hidden rounded-xl border bg-card shadow-xl shadow-primary/8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: easeOutExpo }}
+          >
+            <div className="flex flex-col gap-5 p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    Checkout
+                  </p>
+                  <h2 className="mt-2 text-2xl font-extrabold">
+                    Konfirmasi daftar
+                  </h2>
+                </div>
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <CreditCard className="size-5" />
+                </div>
+              </div>
+
+              <Alert className={cn("border", statusCopy[regStatus].tone)}>
+                <CheckCircle2 />
+                <AlertTitle>{statusCopy[regStatus].label}</AlertTitle>
+                <AlertDescription>
+                  {statusCopy[regStatus].message}
+                </AlertDescription>
+              </Alert>
+
+              <Separator />
+
+              <div className="flex flex-col gap-4">
+                <InfoRow
+                  icon={Users}
+                  label="Kuota maksimal"
+                  value={`${batch.quota} peserta`}
+                />
+                <InfoRow
+                  icon={UserCheck}
+                  label="Jenis peserta"
+                  value={groupBadges.length ? groupBadges.join(", ") : "-"}
+                />
+                <InfoRow
+                  icon={CalendarDays}
+                  label="Periode kelas"
+                  value={coursePeriodText}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-4 text-xs text-muted-foreground">
+                  <span>Progress periode daftar</span>
+                  <span>{Math.round(registrationProgress)}%</span>
+                </div>
+                <Progress value={registrationProgress} />
+                {typeof daysLeft === "number" && (
+                  <p className="text-xs text-muted-foreground">
+                    Sisa {daysLeft} hari sebelum pendaftaran selesai.
+                  </p>
+                )}
+              </div>
+
+              <Button
+                onClick={handlePurchase}
+                disabled={buttonDisabled}
+                size="lg"
+                className="h-12 w-full rounded-full"
+              >
+                {buttonLabel}
+                {!buttonDisabled && <ArrowRight data-icon="inline-end" />}
+              </Button>
+
+              <Button
+                variant="outline"
+                asChild
+                size="sm"
+                className="w-full rounded-full"
+              >
+                <Link href={`/kursus/${batch.slug}`}>
+                  Cek halaman gelombang
+                </Link>
+              </Button>
+            </div>
+          </motion.div>
         </aside>
+      </div>
+    </section>
+  );
+}
+
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: ElementType;
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border bg-background p-4">
+      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Icon className="size-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className="mt-1 text-sm font-semibold leading-6 text-foreground">
+          {value}
+        </p>
       </div>
     </div>
   );
 }
 
-function InfoRow({
-  icon,
+function StatCard({
+  icon: Icon,
   label,
   value,
-  badgeColor,
+  index,
 }: {
-  icon?: React.ReactNode;
+  icon: ElementType;
   label: string;
-  value: React.ReactNode;
-  badgeColor?: string;
+  value: ReactNode;
+  index: number;
 }) {
-  const isBadge = typeof badgeColor === "string";
   return (
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 text-orange-600">{icon}</div>
-      <div className="flex-1">
-        <div className="text-[13px] text-muted-foreground">{label}</div>
-        {isBadge ? (
-          <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}
-          >
-            {value}
-          </span>
-        ) : (
-          <div className="font-medium">{value}</div>
-        )}
+    <motion.div
+      className="group rounded-xl border bg-card p-5 transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.22, ease: easeOutExpo }}
+    >
+      <div className="mb-8 flex items-center justify-between">
+        <Icon className="size-5 text-primary" />
+        <span className="text-xs font-medium text-muted-foreground">
+          0{index}
+        </span>
       </div>
-    </div>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-2 text-lg font-bold leading-7">{value}</p>
+    </motion.div>
   );
 }

@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PencilLine } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
+import { TCourseBatch } from "@/components/(dashboard)/kursus/gelombang/_types/course-batch-type";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -26,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TCourseBatch } from "@/components/(dashboard)/kursus/gelombang/_types/course-batch-type";
+import { Textarea } from "@/components/ui/textarea";
 import { API_BASE_URL } from "@/helpers/api-config";
 
 const schema = z.object({
@@ -68,9 +69,9 @@ export function UmpanBalikCreateDialog({
         });
 
         const arr = res?.data?.data ?? [];
-        const mapped: BatchOption[] = arr.map((b: TCourseBatch) => ({
-          id: b.id,
-          title: b.title ?? b.slug ?? "Tanpa Judul",
+        const mapped: BatchOption[] = arr.map((batch: TCourseBatch) => ({
+          id: batch.id,
+          title: batch.title ?? batch.slug ?? "Tanpa Judul",
         }));
 
         if (!cancelled) setBatchOptions(mapped);
@@ -93,13 +94,16 @@ export function UmpanBalikCreateDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="orange">+ Buat Umpan Balik</Button>
+        <Button className="gap-2 rounded-full">
+          <PencilLine className="size-4 shrink-0" />
+          Buat Umpan Balik
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle>Buat Umpan Balik</DialogTitle>
           <DialogDescription>
-            Berikan penilaian untuk kelas yang telah kamu ikuti.
+            Berikan penilaian untuk kelas yang sudah kamu ikuti.
           </DialogDescription>
         </DialogHeader>
 
@@ -110,22 +114,19 @@ export function UmpanBalikCreateDialog({
             try {
               const token = Cookies.get("access_token");
 
-              const body = {
-                // beberapa API cukup terima rating/title/description saja karena batch_id ada di URL
-                rating: Number(values.rating),
-                title: values.title,
-                description: values.description || undefined,
-              };
-
               await axios.post(
                 `${API_BASE_URL}/batches/${values.batch_id}/testimonials`,
-                body,
+                {
+                  rating: Number(values.rating),
+                  title: values.title,
+                  description: values.description || undefined,
+                },
                 {
                   withCredentials: true,
                   headers: token
                     ? { Authorization: `Bearer ${token}` }
                     : undefined,
-                }
+                },
               );
 
               setOpen(false);
@@ -140,8 +141,8 @@ export function UmpanBalikCreateDialog({
             <label className="text-sm font-medium">Kelas</label>
             <Select
               value={form.watch("batch_id")}
-              onValueChange={(v) =>
-                form.setValue("batch_id", v, { shouldValidate: true })
+              onValueChange={(value) =>
+                form.setValue("batch_id", value, { shouldValidate: true })
               }
               disabled={isLoadingBatches}
             >
@@ -158,9 +159,9 @@ export function UmpanBalikCreateDialog({
                     Tidak ada kelas tersedia
                   </div>
                 ) : (
-                  batchOptions.map((b) => (
-                    <SelectItem key={b.id} value={b.id}>
-                      {b.title}
+                  batchOptions.map((batch) => (
+                    <SelectItem key={batch.id} value={batch.id}>
+                      {batch.title}
                     </SelectItem>
                   ))
                 )}
@@ -177,17 +178,17 @@ export function UmpanBalikCreateDialog({
             <label className="text-sm font-medium">Rating</label>
             <Select
               value={form.watch("rating")}
-              onValueChange={(v) =>
-                form.setValue("rating", v, { shouldValidate: true })
+              onValueChange={(value) =>
+                form.setValue("rating", value, { shouldValidate: true })
               }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Pilih rating" />
               </SelectTrigger>
               <SelectContent>
-                {[5, 4, 3, 2, 1].map((r) => (
-                  <SelectItem key={r} value={String(r)}>
-                    {"★".repeat(r)}
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <SelectItem key={rating} value={String(rating)}>
+                    {rating} bintang
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -229,8 +230,8 @@ export function UmpanBalikCreateDialog({
             >
               Batal
             </Button>
-            <Button variant="orange" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Menyimpan…" : "Simpan Umpan Balik"}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan..." : "Simpan Umpan Balik"}
             </Button>
           </DialogFooter>
         </form>

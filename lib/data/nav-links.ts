@@ -20,9 +20,9 @@ export const navLinks = {
     },
     {
       title: "Jadwal Workshop",
-      href: "/jadwal-workshop",
+      href: "/coming-soon",
       description:
-        "Lihat informasi waktu dan topik workshop singkat yang tersedia di Tax Center.",
+        "Halaman workshop sedang disiapkan untuk jadwal dan topik terbaru.",
     },
   ],
   db_tax: [

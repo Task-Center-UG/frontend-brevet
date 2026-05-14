@@ -2,15 +2,10 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertCircle,
   CheckCircle2,
@@ -22,11 +17,16 @@ import {
   Share2,
   FileDown,
   Copy,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetData } from "@/hooks/use-get-data";
 import { toast } from "sonner";
 import { CertificateAPI } from "./_types/certificate-type";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 function isDefaultDate(d?: string | null) {
   if (!d) return true;
@@ -44,36 +44,65 @@ function formatDate(d?: string | null) {
   });
 }
 
-function StatusPill({
+const statusMeta: Record<
+  NonNullable<CertificateAPI["status"]>,
+  { label: string; className: string }
+> = {
+  valid: {
+    label: "Sertifikat valid",
+    className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-700",
+  },
+  expired: {
+    label: "Sudah expired",
+    className: "border-amber-500/20 bg-amber-500/10 text-amber-700",
+  },
+  revoked: {
+    label: "Dicabut",
+    className: "border-destructive/20 bg-destructive/10 text-destructive",
+  },
+  "not-found": {
+    label: "Tidak ditemukan",
+    className: "border-muted bg-muted text-muted-foreground",
+  },
+};
+
+function StatusBadge({
   status,
 }: {
   status: NonNullable<CertificateAPI["status"]>;
 }) {
-  if (status === "valid") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-        <CheckCircle2 className="h-4 w-4" /> Sertifikat Valid
-      </span>
-    );
-  }
-  if (status === "expired") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">
-        <AlertCircle className="h-4 w-4" /> Sudah Expired
-      </span>
-    );
-  }
-  if (status === "revoked") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-        <AlertCircle className="h-4 w-4" /> Dicabut
-      </span>
-    );
-  }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700">
-      <AlertCircle className="h-4 w-4" /> Tidak Ditemukan
-    </span>
+    <Badge
+      variant="outline"
+      className={cn("rounded-full px-3 py-1", statusMeta[status].className)}
+    >
+      {status === "valid" ? <CheckCircle2 /> : <AlertCircle />}
+      {statusMeta[status].label}
+    </Badge>
+  );
+}
+
+function ResultLine({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Icon className="size-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <div className="mt-1 break-words text-sm font-semibold leading-6 text-foreground">
+          {value}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -128,95 +157,96 @@ const ValidasiSertifikatId: React.FC<Props> = ({ sertifikatId }) => {
   }
 
   return (
-    <section className="w-full py-16 dark:bg-background transition-colors">
-      <div className="max-w-screen-md mx-auto px-6">
-        <h1 className="text-2xl font-bold mb-6">Detail Sertifikat</h1>
+    <section className="w-full overflow-hidden bg-background text-foreground">
+      <div className="relative border-b bg-[linear-gradient(135deg,oklch(0.985_0.006_78),oklch(0.955_0.01_86))] dark:bg-[linear-gradient(135deg,oklch(0.16_0.012_285),oklch(0.21_0.014_285))]">
+        <div className="mx-auto flex max-w-screen-xl flex-col gap-6 px-6 pb-16 pt-16 md:pb-20 md:pt-24">
+          <motion.div
+            className="flex max-w-5xl flex-col gap-6"
+            initial={{ opacity: 0, y: 34 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: easeOutExpo }}
+          >
+            <Badge variant="outline" className="w-fit rounded-full border-primary/20 bg-primary/10 px-3 py-1 text-primary">
+              <ShieldCheck />
+              Validasi Sertifikat
+            </Badge>
+            <h1 className="text-[2.75rem] font-extrabold leading-[0.98] tracking-normal md:text-[4.5rem] lg:text-[5.5rem]">
+              Detail Sertifikat
+            </h1>
+            <p className="max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
+              Halaman ini membaca status sertifikat langsung dari sistem Tax Center Gunadarma.
+            </p>
+          </motion.div>
+        </div>
+      </div>
 
+      <div className="mx-auto max-w-screen-xl px-6 py-16 lg:py-24">
         {!id && (
-          <div className="flex items-center gap-2 text-red-600 text-sm mb-6">
-            <AlertCircle className="h-4 w-4" />
-            ID sertifikat tidak ditemukan pada URL.
-          </div>
+          <Alert className="mb-6 border-destructive/20 bg-destructive/5">
+            <AlertCircle />
+            <AlertTitle>ID sertifikat tidak ditemukan</AlertTitle>
+            <AlertDescription>Periksa kembali tautan validasi sertifikat.</AlertDescription>
+          </Alert>
         )}
 
         {isLoading && (
-          <div className="space-y-3">
-            <Skeleton className="h-6 w-1/3 rounded" />
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex justify-between items-center">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-40" />
-              </div>
-            ))}
+          <div className="rounded-xl border bg-card p-6 md:p-8">
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-7 w-44 rounded-full" />
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
+              ))}
+            </div>
           </div>
         )}
 
         {isError && (
-          <div className="flex items-center gap-2 text-red-600 text-sm">
-            <AlertCircle className="h-4 w-4" />
-            Gagal memuat data sertifikat.
-          </div>
+          <Alert className="border-destructive/20 bg-destructive/5">
+            <AlertCircle />
+            <AlertTitle>Gagal memuat data sertifikat</AlertTitle>
+            <AlertDescription>Data tidak ditemukan atau server tidak dapat memproses validasi.</AlertDescription>
+          </Alert>
         )}
 
         {cert && (
-          <div className="p-6 rounded-lg border bg-card shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead
-                    colSpan={2}
-                    className="text-2xl font-semibold text-primary"
-                  >
-                    Hasil Validasi
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="flex items-center gap-2 font-medium text-muted-foreground">
-                    <IdCard className="h-4 w-4 text-orange-500" />
-                    Nomor / ID Sertifikat
-                  </TableCell>
-                  <TableCell className="break-all">{number}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="flex items-center gap-2 font-medium text-muted-foreground">
-                    <User className="h-4 w-4 text-orange-500" />
-                    Peserta
-                  </TableCell>
-                  <TableCell>{participant}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="flex items-center gap-2 font-medium text-muted-foreground">
-                    <BookOpen className="h-4 w-4 text-orange-500" />
-                    Kursus
-                  </TableCell>
-                  <TableCell>{course}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="flex items-center gap-2 font-medium text-muted-foreground">
-                    <CalendarDays className="h-4 w-4 text-orange-500" />
-                    Terbit
-                  </TableCell>
-                  <TableCell>{issuedAt}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+          <motion.div
+            className="rounded-xl border bg-card p-6 shadow-xl shadow-primary/6 md:p-8"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: easeOutExpo }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  Hasil Validasi
+                </p>
+                <h2 className="mt-2 text-3xl font-extrabold">Data sertifikat</h2>
+              </div>
+              <StatusBadge status={inferredStatus} />
+            </div>
 
-            <div className="p-4 flex flex-wrap gap-2">
-              <StatusPill status={inferredStatus} />
+            <Separator className="my-6" />
 
+            <div className="grid gap-5 md:grid-cols-2">
+              <ResultLine icon={IdCard} label="Nomor atau ID Sertifikat" value={number} />
+              <ResultLine icon={User} label="Peserta" value={participant} />
+              <ResultLine icon={BookOpen} label="Kursus" value={course} />
+              <ResultLine icon={CalendarDays} label="Terbit" value={issuedAt} />
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-2">
               {cert.url && (
                 <Button
                   asChild
                   variant="secondary"
+                  className="rounded-full"
                   onClick={() =>
-                    notify("Membuka / mengunduh sertifikat dalam tab baru.")
+                    notify("Membuka atau mengunduh sertifikat dalam tab baru.")
                   }
                 >
                   <a href={cert.url} target="_blank" rel="noreferrer">
-                    <FileDown className="mr-2 h-4 w-4" />
-                    Lihat / Unduh Sertifikat
+                    <FileDown data-icon="inline-start" />
+                    Lihat Sertifikat
                   </a>
                 </Button>
               )}
@@ -226,13 +256,14 @@ const ValidasiSertifikatId: React.FC<Props> = ({ sertifikatId }) => {
                 onClick={() =>
                   handleCopy(number.toString(), "Nomor sertifikat tersalin.")
                 }
+                className="rounded-full"
               >
-                <Copy className="mr-2 h-4 w-4" />
+                <Copy data-icon="inline-start" />
                 Salin Nomor
               </Button>
 
-              <Button variant="outline" onClick={handleShare}>
-                <Share2 className="mr-2 h-4 w-4" />
+              <Button variant="outline" onClick={handleShare} className="rounded-full">
+                <Share2 data-icon="inline-start" />
                 Bagikan
               </Button>
 
@@ -243,12 +274,13 @@ const ValidasiSertifikatId: React.FC<Props> = ({ sertifikatId }) => {
                     typeof window !== "undefined" ? window.location.href : "";
                   handleCopy(shareUrl, "Tautan halaman tersalin.");
                 }}
+                className="rounded-full"
               >
-                <LinkIcon className="mr-2 h-4 w-4" />
-                Salin Tautan Halaman
+                <LinkIcon data-icon="inline-start" />
+                Salin Tautan
               </Button>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </section>

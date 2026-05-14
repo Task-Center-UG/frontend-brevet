@@ -22,16 +22,16 @@ const NotFoundPage = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button className="rounded-full" asChild>
+            <Button className="gap-2 rounded-full" asChild>
               <Link href="/">
-                <Home data-icon="inline-start" />
+                <Home className="size-4 shrink-0" />
                 Kembali ke Beranda
               </Link>
             </Button>
-            <Button variant="outline" className="rounded-full" asChild>
+            <Button variant="outline" className="gap-2 rounded-full" asChild>
               <Link href="/jadwal-program">
                 Lihat Jadwal Program
-                <ArrowLeft className="size-4 rotate-180" />
+                <ArrowLeft className="size-4 shrink-0 rotate-180" />
               </Link>
             </Button>
           </div>
@@ -45,7 +45,7 @@ const NotFoundPage = () => {
                 Navigasi
               </p>
               <p className="mt-3 text-3xl font-extrabold leading-tight">
-                Ambil jalur resmi, kembali ke halaman utama.
+                Coba kembali ke beranda atau lihat jadwal program yang tersedia.
               </p>
             </div>
           </div>

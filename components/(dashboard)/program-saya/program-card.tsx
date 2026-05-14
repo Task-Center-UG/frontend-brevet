@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useGetData } from "@/hooks/use-get-data";
 import { usePostData } from "@/hooks/use-post-data";
+import { toAssetUrl } from "@/helpers/api-config";
 import * as React from "react";
 
 const dayLabels: Record<string, string> = {
@@ -62,6 +63,10 @@ function extractUrlDeep(res: unknown): string | null {
   }
   return null;
 }
+function extractAssetUrlDeep(res: unknown): string | null {
+  const url = extractUrlDeep(res);
+  return url ? toAssetUrl(url) : null;
+}
 
 type Props = { course: TMyCourse };
 
@@ -86,7 +91,7 @@ export function ProgramSayaCard({ course }: Props) {
       enabled: progress >= 100,
     },
   });
-  const existingCertUrl = extractUrlDeep(certData);
+  const existingCertUrl = extractAssetUrlDeep(certData);
 
   const generateCert = usePostData({
     queryKey: `my-certificate-${course.id}`,
@@ -106,7 +111,7 @@ export function ProgramSayaCard({ course }: Props) {
     setIsChecking(true);
     try {
       const result = await refetchCert?.();
-      const freshUrl = extractUrlDeep(result?.data ?? certData);
+      const freshUrl = extractAssetUrlDeep(result?.data ?? certData);
       if (freshUrl) {
         openUrl(freshUrl);
         return;
@@ -117,7 +122,7 @@ export function ProgramSayaCard({ course }: Props) {
 
     generateCert.mutate({} as Record<string, unknown>, {
       onSuccess: (res: unknown) => {
-        const url = extractUrlDeep(res);
+        const url = extractAssetUrlDeep(res);
         if (url) openUrl(url);
       },
     });

@@ -22,16 +22,16 @@ const AccessDeniedPage = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button className="rounded-full" asChild>
+            <Button className="gap-2 rounded-full" asChild>
               <Link href="/">
-                <Home data-icon="inline-start" />
+                <Home className="size-4 shrink-0" />
                 Kembali ke Beranda
               </Link>
             </Button>
-            <Button variant="outline" className="rounded-full" asChild>
+            <Button variant="outline" className="gap-2 rounded-full" asChild>
               <Link href="/auth/sign-in">
                 Masuk Ulang
-                <ArrowRight data-icon="inline-end" />
+                <ArrowRight className="size-4 shrink-0" />
               </Link>
             </Button>
           </div>
@@ -45,7 +45,7 @@ const AccessDeniedPage = () => {
                 Keamanan akun
               </p>
               <p className="mt-3 text-3xl font-extrabold leading-tight">
-                Izin akses mengikuti role admin, guru, dan siswa.
+                Gunakan akun dengan role yang sesuai untuk membuka halaman ini.
               </p>
             </div>
           </div>

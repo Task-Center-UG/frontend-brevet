@@ -1,13 +1,12 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FileText, Newspaper } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -16,21 +15,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { usePutData } from "@/hooks/use-put-data";
-import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
-import { useForm } from "react-hook-form";
 import { useFileUploader } from "@/hooks/use-file-uploader";
+import { useGetData } from "@/hooks/use-get-data";
+import { usePutData } from "@/hooks/use-put-data";
+
+import {
+  DashboardFormActions,
+  DashboardFormHeader,
+  DashboardFormSection,
+} from "../kursus/_components/dashboard-form-shell";
 import {
   CreateNewsFormData,
   CreateNewsSchema,
 } from "./_schemas/news-create-schema";
-import { useGetData } from "@/hooks/use-get-data";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
 
 type Props = {
   newsSlug: string;
@@ -38,7 +38,6 @@ type Props = {
 
 const NewsUpdateForm = ({ newsSlug }: Props) => {
   const [isReady, setIsReady] = useState(false);
-
   const { uploadFile } = useFileUploader();
 
   const { data, isLoading: isFetching } = useGetData({
@@ -74,13 +73,12 @@ const NewsUpdateForm = ({ newsSlug }: Props) => {
   };
 
   const onSubmit = (values: CreateNewsFormData) => {
-    const payload = {
+    updateNews({
       title: values.title,
       description: values.short_description,
       content: values.full_description,
       image: values.image,
-    };
-    updateNews(payload);
+    });
   };
 
   useEffect(() => {
@@ -97,119 +95,196 @@ const NewsUpdateForm = ({ newsSlug }: Props) => {
 
   if (!isReady) return null;
 
+  const title = form.watch("title");
+  const shortDescription = form.watch("short_description");
+  const image = form.watch("image");
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Update Berita</CardTitle>
-            <CardDescription>
-              Perbarui informasi berita di sini.
-            </CardDescription>
-          </CardHeader>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="min-w-0 space-y-5"
+      >
+        <DashboardFormHeader
+          eyebrow="Manajemen Berita"
+          title="Perbarui berita tanpa merusak ritme baca."
+          description="Cek ulang judul, ringkasan, isi, dan gambar utama agar artikel tetap jelas untuk pembaca publik."
+        />
 
-          <CardContent className="grid grid-cols-1 gap-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Judul</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Judul berita"
-                      disabled={isFetching}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="short_description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Deskripsi Singkat</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Deskripsi singkat"
-                      disabled={isFetching}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="full_description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Isi Berita</FormLabel>
-                  <FormControl>
-                    <MinimalTiptapEditor
-                      key={newsSlug}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Masukkan isi lengkap berita..."
-                      autofocus={false}
-                      editable={!isFetching}
-                      output="html"
-                      className="w-full max-w-full overflow-hidden"
-                      editorContentClassName="prose max-w-none p-4"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Gambar Berita</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      disabled={isFetching}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-
-          <CardFooter>
-            <Button
-              type="submit"
-              disabled={isPending || isFetching}
-              className="w-full md:w-fit"
-              variant={"orange"}
+        <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <main className="min-w-0 space-y-5">
+            <DashboardFormSection
+              step="01"
+              title="Identitas berita"
+              description="Judul dan ringkasan menjadi sinyal pertama di daftar berita."
             >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menyimpan...
-                </>
-              ) : (
-                "Perbarui Data"
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
+              <div className="grid gap-5">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Judul</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Judul berita"
+                          disabled={isFetching}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="short_description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Deskripsi Singkat</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Ringkas isi berita dalam satu sampai dua kalimat"
+                          disabled={isFetching}
+                          className="min-h-24"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </DashboardFormSection>
+
+            <DashboardFormSection
+              step="02"
+              title="Isi berita"
+              description="Pastikan susunan artikel mudah dibaca, tidak hanya panjang."
+            >
+              <FormField
+                control={form.control}
+                name="full_description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Isi Berita</FormLabel>
+                    <FormControl>
+                      <MinimalTiptapEditor
+                        key={newsSlug}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Masukkan isi lengkap berita..."
+                        autofocus={false}
+                        editable={!isFetching}
+                        output="html"
+                        className="w-full max-w-full overflow-hidden"
+                        editorContentClassName="prose max-w-none p-4"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </DashboardFormSection>
+
+            <DashboardFormSection
+              step="03"
+              title="Gambar utama"
+              description="Ganti gambar hanya jika gambar lama sudah tidak relevan."
+            >
+              <FormField
+                control={form.control}
+                name="image"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Gambar Berita</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        disabled={isFetching}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </DashboardFormSection>
+          </main>
+
+          <NewsPreview
+            title={title}
+            description={shortDescription}
+            image={image}
+            mode="Update Berita"
+          />
+        </div>
+
+        <DashboardFormActions
+          disabled={isPending || isFetching}
+          pending={isPending}
+          label="Perbarui Data"
+          note="Simpan setelah perubahan berita sudah dicek."
+        />
       </form>
     </Form>
   );
 };
+
+function NewsPreview({
+  title,
+  description,
+  image,
+  mode,
+}: {
+  title?: string;
+  description?: string;
+  image?: string;
+  mode: string;
+}) {
+  return (
+    <aside className="min-w-0 space-y-5 xl:sticky xl:top-24 xl:h-fit">
+      <section className="overflow-hidden rounded-lg border bg-card">
+        <div className="relative aspect-[4/3] bg-muted">
+          <ImageWithFallback
+            src={image || "/placeholder.jpeg"}
+            alt="Pratinjau gambar berita"
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div className="p-5">
+          <Badge variant="secondary" className="gap-2">
+            <Newspaper className="size-3" />
+            {mode}
+          </Badge>
+          <h2 className="mt-4 text-xl font-bold leading-7">
+            {title || "Judul berita"}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {description || "Deskripsi singkat belum diisi."}
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-lg border bg-card p-5">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 text-primary">
+            <FileText className="size-5" />
+          </span>
+          <div>
+            <h2 className="font-bold">Jaga kualitas publik.</h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Perubahan judul, isi, dan gambar langsung memengaruhi halaman
+              berita publik.
+            </p>
+          </div>
+        </div>
+      </section>
+    </aside>
+  );
+}
 
 export default NewsUpdateForm;

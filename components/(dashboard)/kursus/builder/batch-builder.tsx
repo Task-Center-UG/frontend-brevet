@@ -25,13 +25,7 @@ import QuizDatatable from "@/components/(dashboard)/kursus/gelombang/pertemuan/q
 import TugasDataTable from "@/components/(dashboard)/kursus/gelombang/pertemuan/tugas/tugas-datatable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetData } from "@/hooks/use-get-data";
@@ -42,7 +36,13 @@ type Props = {
   batchSlug: string;
 };
 
-type BuilderTab = "pertemuan" | "absensi" | "materi" | "tugas" | "quiz" | "nilai";
+type BuilderTab =
+  | "pertemuan"
+  | "absensi"
+  | "materi"
+  | "tugas"
+  | "quiz"
+  | "nilai";
 
 const tabLabels: Record<BuilderTab, string> = {
   pertemuan: "Pertemuan",
@@ -57,7 +57,7 @@ const contentTabs: BuilderTab[] = ["materi", "tugas", "quiz", "nilai"];
 
 const isBuilderTab = (value: string | null): value is BuilderTab =>
   ["pertemuan", "absensi", "materi", "tugas", "quiz", "nilai"].includes(
-    value ?? ""
+    value ?? "",
   );
 
 const formatDateTime = (value?: string) => {
@@ -102,12 +102,12 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
 
   const selectedMeeting = useMemo(
     () => meetings.find((meeting) => meeting.id === selectedMeetingId),
-    [meetings, selectedMeetingId]
+    [meetings, selectedMeetingId],
   );
 
   const selectedMeetingIndex = useMemo(
     () => meetings.findIndex((meeting) => meeting.id === selectedMeetingId),
-    [meetings, selectedMeetingId]
+    [meetings, selectedMeetingId],
   );
 
   const updateBuilderQuery = (next: {
@@ -137,7 +137,7 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
     const params = new URLSearchParams(searchParamsString);
     const currentMeeting = params.get("meeting");
     const hasCurrentMeeting = meetings.some(
-      (meeting) => meeting.id === currentMeeting
+      (meeting) => meeting.id === currentMeeting,
     );
 
     if (meetings[0]?.id && (!currentMeeting || !hasCurrentMeeting)) {
@@ -187,14 +187,6 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
             <CardTitle className="text-2xl leading-tight">
               {batch?.title ?? "Gelombang"}
             </CardTitle>
-            {batch?.description ? (
-              <div
-                className="prose prose-sm mt-2 max-w-3xl text-muted-foreground dark:prose-invert"
-                dangerouslySetInnerHTML={{ __html: batch.description }}
-              />
-            ) : (
-              <CardDescription className="mt-2 max-w-3xl">-</CardDescription>
-            )}
           </div>
           <CardAction className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" className="gap-2" asChild>
@@ -264,7 +256,7 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
                       }
                       className={cn(
                         "w-full rounded-lg border p-3 text-left transition hover:bg-muted/60",
-                        active && "border-primary bg-primary/5"
+                        active && "border-primary bg-primary/5",
                       )}
                     >
                       <div className="flex items-center gap-2">
@@ -323,9 +315,7 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
                     <Badge variant="outline">
                       Pertemuan #{selectedMeetingIndex + 1}
                     </Badge>
-                    <Badge variant="secondary">
-                      {tabLabels[activeTab]}
-                    </Badge>
+                    <Badge variant="secondary">{tabLabels[activeTab]}</Badge>
                   </div>
                   <h2 className="mt-2 truncate text-base font-semibold">
                     {selectedMeeting.title}
@@ -353,7 +343,8 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
                 <div className="border-b p-4">
                   <h2 className="text-base font-semibold">Pertemuan</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Kelola data pertemuan, lalu buka materi, tugas, quiz, atau nilai dari baris yang sama.
+                    Kelola data pertemuan, lalu buka materi, tugas, quiz, atau
+                    nilai dari baris yang sama.
                   </p>
                 </div>
                 <div className="space-y-3 p-4">
@@ -362,7 +353,8 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
                       <Route className="mb-3 h-8 w-8 text-muted-foreground" />
                       <p className="text-sm font-medium">Belum ada pertemuan</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Tambah pertemuan untuk mulai isi materi, tugas, dan quiz.
+                        Tambah pertemuan untuk mulai isi materi, tugas, dan
+                        quiz.
                       </p>
                       <Button className="mt-4 gap-2" variant="orange" asChild>
                         <Link
@@ -379,7 +371,8 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
                         key={meeting.id}
                         className={cn(
                           "grid gap-3 rounded-lg border p-4 xl:grid-cols-[minmax(0,1fr)_auto]",
-                          selectedMeetingId === meeting.id && "border-primary bg-primary/5"
+                          selectedMeetingId === meeting.id &&
+                            "border-primary bg-primary/5",
                         )}
                       >
                         <div className="min-w-0 space-y-2">
@@ -460,7 +453,10 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
             </TabsContent>
 
             <TabsContent value="materi" className="mt-0">
-              <BuilderMeetingScope selectedMeeting={selectedMeeting} tab="materi">
+              <BuilderMeetingScope
+                selectedMeeting={selectedMeeting}
+                tab="materi"
+              >
                 {activeTab === "materi" && (
                   <MateriDataTable
                     key={`materi-${selectedMeetingId}`}
@@ -472,7 +468,10 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
             </TabsContent>
 
             <TabsContent value="tugas" className="mt-0">
-              <BuilderMeetingScope selectedMeeting={selectedMeeting} tab="tugas">
+              <BuilderMeetingScope
+                selectedMeeting={selectedMeeting}
+                tab="tugas"
+              >
                 {activeTab === "tugas" && (
                   <TugasDataTable
                     key={`tugas-${selectedMeetingId}`}
@@ -496,7 +495,10 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
             </TabsContent>
 
             <TabsContent value="nilai" className="mt-0">
-              <BuilderMeetingScope selectedMeeting={selectedMeeting} tab="nilai">
+              <BuilderMeetingScope
+                selectedMeeting={selectedMeeting}
+                tab="nilai"
+              >
                 {activeTab === "nilai" && (
                   <NilaiDatatable
                     key={`nilai-${selectedMeetingId}`}

@@ -12,9 +12,11 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="flex w-full overflow-hidden">
+      <div className="flex min-w-0 w-full overflow-hidden">
         <AppSidebar />
-        <SidebarInset className="overflow-auto">{children}</SidebarInset>
+        <SidebarInset className="overflow-y-auto overflow-x-hidden">
+          {children}
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );

@@ -53,14 +53,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem className="flex flex-row items-center justify-between gap-14">
-            <Link href="/">
+          <SidebarMenuItem className="flex min-w-0 flex-row items-center justify-between gap-3">
+            <Link href="/" className="min-w-0 group-data-[collapsible=icon]:hidden">
               <ImageWithFallback
                 src="/logo-dark-tc.png"
                 alt="Logo Tax Center"
                 width={150}
                 height={50}
-                className="block dark:hidden"
+                className="block h-auto max-w-full dark:hidden"
                 priority
               />
               <ImageWithFallback
@@ -68,11 +68,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 alt="Logo Tax Center Dark"
                 width={150}
                 height={50}
-                className="hidden dark:block"
+                className="hidden h-auto max-w-full dark:block"
                 priority
               />
             </Link>
-            <ModeToggle />
+            <ModeToggle className="shrink-0" />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

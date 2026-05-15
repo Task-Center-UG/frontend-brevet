@@ -2,9 +2,9 @@
 
 import { useGetData } from "@/hooks/use-get-data";
 import { useDataTableQueryParams } from "@/hooks/use-data-table-query-params";
-import { DataTable } from "@/components/ui/datatable";
+import { ManagedUserList } from "@/components/(dashboard)/_shared/managed-user-list";
 import { TGuru } from "./_types/guru-type";
-import { guruColumns } from "./guru-column";
+import { GuruAction } from "./guru-action";
 
 const GuruDataTable = () => {
   const { page, limit, search, filters } = useDataTableQueryParams();
@@ -33,12 +33,15 @@ const GuruDataTable = () => {
   };
 
   return (
-    <DataTable
-      columns={guruColumns}
-      data={teachers}
+    <ManagedUserList
+      users={teachers}
       meta={meta}
       isLoading={isLoading}
+      roleLabel="Pengajar"
       searchPlaceholder="Cari Nama Pengajar"
+      emptyTitle="Belum ada pengajar."
+      emptyDescription="Tambah pengajar agar kelas bisa ditugaskan dan dikelola dengan jelas."
+      renderAction={(teacher) => <GuruAction memberId={teacher.id} />}
     />
   );
 };

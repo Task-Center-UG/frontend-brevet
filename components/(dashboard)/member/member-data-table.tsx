@@ -2,9 +2,9 @@
 
 import { useGetData } from "@/hooks/use-get-data";
 import { useDataTableQueryParams } from "@/hooks/use-data-table-query-params";
-import { DataTable } from "@/components/ui/datatable";
+import { ManagedUserList } from "@/components/(dashboard)/_shared/managed-user-list";
 import { TMember } from "./_types/member-type";
-import { memberColumns } from "./member-column";
+import { MemberAction } from "./member-action";
 
 const MemberDataTable = () => {
   const { page, limit, search, filters } = useDataTableQueryParams();
@@ -44,13 +44,17 @@ const MemberDataTable = () => {
   };
 
   return (
-    <DataTable
-      columns={memberColumns}
-      data={members}
+    <ManagedUserList
+      users={members}
       meta={meta}
       isLoading={isLoading}
+      roleLabel="Peserta"
       searchPlaceholder="Cari Nama Peserta"
       filterOptions={filterOptions}
+      showGroup
+      emptyTitle="Belum ada peserta."
+      emptyDescription="Peserta akan muncul setelah terdaftar atau ditambahkan ke sistem."
+      renderAction={(member) => <MemberAction memberId={member.id} />}
     />
   );
 };

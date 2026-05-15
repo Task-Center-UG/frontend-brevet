@@ -2,9 +2,9 @@
 
 import { useGetData } from "@/hooks/use-get-data";
 import { useDataTableQueryParams } from "@/hooks/use-data-table-query-params";
-import { DataTable } from "@/components/ui/datatable";
+import { ManagedUserList } from "@/components/(dashboard)/_shared/managed-user-list";
 import { TAdmin } from "./_types/admin-type";
-import { adminColumns } from "./admin-column";
+import { AdminAction } from "./admin-action";
 
 const AdminDataTable = () => {
   const { page, limit, search, filters } = useDataTableQueryParams();
@@ -33,12 +33,15 @@ const AdminDataTable = () => {
   };
 
   return (
-    <DataTable
-      columns={adminColumns}
-      data={admins}
+    <ManagedUserList
+      users={admins}
       meta={meta}
       isLoading={isLoading}
+      roleLabel="Admin"
       searchPlaceholder="Cari Nama Admin"
+      emptyTitle="Belum ada admin."
+      emptyDescription="Tambah admin agar akses operasional bisa dikelola oleh akun yang tepat."
+      renderAction={(admin) => <AdminAction memberId={admin.id} />}
     />
   );
 };

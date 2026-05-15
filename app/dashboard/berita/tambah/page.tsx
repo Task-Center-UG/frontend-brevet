@@ -14,7 +14,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function DashboardNewsCreateage() {
   return (
-    <section>
+    <section className="min-w-0">
       <header className="flex h-16 shrink-0 items-center gap-2">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -35,7 +35,7 @@ export default function DashboardNewsCreateage() {
           </Breadcrumb>
         </div>
       </header>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 pt-0 lg:p-6 lg:pt-0">
         <NewsFormCreate />
       </div>
     </section>

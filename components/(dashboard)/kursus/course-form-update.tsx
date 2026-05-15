@@ -1,13 +1,13 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { BookOpen, Target } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
+import { Badge } from "@/components/ui/badge";
+import FileInput from "@/components/ui/file-input";
 import {
   Form,
   FormControl,
@@ -16,22 +16,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Loader2 } from "lucide-react";
-import { usePutData } from "@/hooks/use-put-data";
 import { useFileUploader } from "@/hooks/use-file-uploader";
-import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
-import FileInput from "@/components/ui/file-input";
 import { useGetData } from "@/hooks/use-get-data";
-import { useEffect, useState } from "react";
-import { TCourseImage } from "./_types/couurse-type";
+import { usePutData } from "@/hooks/use-put-data";
+
+import {
+  DashboardFormActions,
+  DashboardFormHeader,
+  DashboardFormSection,
+} from "./_components/dashboard-form-shell";
 import {
   UpdateCourseFormData,
   UpdateCourseSchema,
 } from "./_schemas/course-update-schema";
+import { TCourseImage } from "./_types/couurse-type";
 
 type Props = {
   courseSlug: string;
@@ -88,12 +88,10 @@ const CourseFormUpdate = ({ courseSlug }: Props) => {
       }
     }
 
-    const payload = {
+    updateCourse({
       ...values,
       course_images: values.course_images,
-    };
-
-    updateCourse(payload);
+    });
   };
 
   const handleUploadFiles = async (files: File[]) => {
@@ -108,10 +106,9 @@ const CourseFormUpdate = ({ courseSlug }: Props) => {
 
     const currentImages = form.getValues("course_images");
     const newImages = uploadedUrls.map((url) => ({ image_url: url }));
-
     const existingUrls = currentImages.map((img) => img.image_url);
     const filteredNewImages = newImages.filter(
-      (img) => !existingUrls.includes(img.image_url)
+      (img) => !existingUrls.includes(img.image_url),
     );
 
     form.setValue("course_images", [...currentImages, ...filteredNewImages], {
@@ -141,170 +138,232 @@ const CourseFormUpdate = ({ courseSlug }: Props) => {
 
   if (!isReady) return null;
 
+  const title = form.watch("title");
+  const shortDescription = form.watch("short_description");
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Update Kursus</CardTitle>
-            <CardDescription>
-              Perbarui informasi kursus di sini.
-            </CardDescription>
-          </CardHeader>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="min-w-0 space-y-5"
+      >
+        <DashboardFormHeader
+          eyebrow="Manajemen Kursus"
+          title="Perbarui kursus tanpa kehilangan struktur konten."
+          description="Cek ulang identitas, narasi, hasil belajar, dan galeri agar halaman publik tetap jelas."
+        />
 
-          <CardContent className="grid grid-cols-1 gap-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Judul Kursus</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Judul kursus"
-                      disabled={isFetching}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="short_description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Deskripsi Singkat</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Deskripsi singkat"
-                      disabled={isFetching}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Deskripsi Lengkap</FormLabel>
-                  <FormControl>
-                    <MinimalTiptapEditor
-                      key={courseSlug}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Masukkan deskripsi lengkap kursus..."
-                      autofocus={false}
-                      editable={!isFetching}
-                      output="html"
-                      className="w-full max-w-full overflow-hidden"
-                      editorContentClassName="prose max-w-none p-4"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="learning_outcomes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Hasil Pembelajaran</FormLabel>
-                  <FormControl>
-                    <MinimalTiptapEditor
-                      key={`lo-${courseSlug}`}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Apa yang akan dipelajari peserta?"
-                      autofocus={false}
-                      editable={!isFetching}
-                      output="html"
-                      className="w-full max-w-full overflow-hidden"
-                      editorContentClassName="prose max-w-none p-4"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="achievements"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pencapaian</FormLabel>
-                  <FormControl>
-                    <MinimalTiptapEditor
-                      key={`ach-${courseSlug}`}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Apa yang akan dicapai peserta?"
-                      autofocus={false}
-                      editable={!isFetching}
-                      output="html"
-                      className="w-full max-w-full overflow-hidden"
-                      editorContentClassName="prose max-w-none p-4"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="course_images"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Gambar Kursus</FormLabel>
-                  <FormControl>
-                    <FileInput
-                      initialUrls={initialUrls}
-                      onRemoveInitial={handleRemoveInitial}
-                      onFilesChange={(incoming) => {
-                        const arr = incoming as (string | File)[];
-                        const onlyFiles = arr.filter(
-                          (it): it is File => it instanceof File
-                        );
-                        if (onlyFiles.length) {
-                          void handleUploadFiles(onlyFiles);
-                        }
-                      }}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </CardContent>
-
-          <CardFooter>
-            <Button
-              type="submit"
-              disabled={isPending || isFetching}
-              className="w-full md:w-fit"
-              variant="orange"
+        <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <main className="min-w-0 space-y-5">
+            <DashboardFormSection
+              step="01"
+              title="Identitas kursus"
+              description="Judul dan ringkasan pendek yang paling cepat dibaca peserta."
             >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menyimpan...
-                </>
-              ) : (
-                "Perbarui Kursus"
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
+              <div className="grid gap-5 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Judul Kursus</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Judul kursus"
+                          disabled={isFetching}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="short_description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Deskripsi Singkat</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Deskripsi singkat"
+                          disabled={isFetching}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </DashboardFormSection>
+
+            <DashboardFormSection
+              step="02"
+              title="Narasi kursus"
+              description="Pastikan deskripsi lengkap mudah dipahami calon peserta."
+            >
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Deskripsi Lengkap</FormLabel>
+                    <FormControl>
+                      <MinimalTiptapEditor
+                        key={courseSlug}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Masukkan deskripsi lengkap kursus..."
+                        autofocus={false}
+                        editable={!isFetching}
+                        output="html"
+                        className="w-full max-w-full overflow-hidden"
+                        editorContentClassName="prose max-w-none p-4"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </DashboardFormSection>
+
+            <DashboardFormSection
+              step="03"
+              title="Hasil belajar"
+              description="Kelompokkan hasil pembelajaran dan pencapaian akhir."
+            >
+              <div className="grid gap-5">
+                <FormField
+                  control={form.control}
+                  name="learning_outcomes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hasil Pembelajaran</FormLabel>
+                      <FormControl>
+                        <MinimalTiptapEditor
+                          key={`lo-${courseSlug}`}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Apa yang akan dipelajari peserta?"
+                          autofocus={false}
+                          editable={!isFetching}
+                          output="html"
+                          className="w-full max-w-full overflow-hidden"
+                          editorContentClassName="prose max-w-none p-4"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="achievements"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pencapaian</FormLabel>
+                      <FormControl>
+                        <MinimalTiptapEditor
+                          key={`ach-${courseSlug}`}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Apa yang akan dicapai peserta?"
+                          autofocus={false}
+                          editable={!isFetching}
+                          output="html"
+                          className="w-full max-w-full overflow-hidden"
+                          editorContentClassName="prose max-w-none p-4"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </DashboardFormSection>
+
+            <DashboardFormSection
+              step="04"
+              title="Galeri kursus"
+              description="Pertahankan gambar yang masih relevan, hapus yang tidak dipakai."
+            >
+              <FormField
+                control={form.control}
+                name="course_images"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Gambar Kursus</FormLabel>
+                    <FormControl>
+                      <FileInput
+                        initialUrls={initialUrls}
+                        onRemoveInitial={handleRemoveInitial}
+                        onFilesChange={(incoming) => {
+                          const arr = incoming as (string | File)[];
+                          const onlyFiles = arr.filter(
+                            (it): it is File => it instanceof File,
+                          );
+                          if (onlyFiles.length) {
+                            void handleUploadFiles(onlyFiles);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </DashboardFormSection>
+          </main>
+
+          <aside className="min-w-0 space-y-5 xl:sticky xl:top-24 xl:h-fit">
+            <section className="overflow-hidden rounded-lg border bg-card">
+              <div className="relative aspect-[4/3] bg-muted">
+                <ImageWithFallback
+                  src={initialUrls[0] || "/placeholder.jpeg"}
+                  alt="Pratinjau gambar kursus"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-5">
+                <Badge variant="secondary" className="gap-2">
+                  <BookOpen className="size-3" />
+                  Update Kursus
+                </Badge>
+                <h2 className="mt-4 text-xl font-bold leading-7">
+                  {title || "Judul kursus"}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {shortDescription || "Ringkasan kursus belum diisi."}
+                </p>
+              </div>
+            </section>
+
+            <section className="rounded-lg border bg-card p-5">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 text-primary">
+                  <Target className="size-5" />
+                </span>
+                <div>
+                  <h2 className="font-bold">Jaga konsistensi publik.</h2>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    Perubahan kursus akan memengaruhi halaman publik dan pilihan
+                    gelombang terkait.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <DashboardFormActions
+          disabled={isPending || isFetching}
+          pending={isPending}
+          label="Perbarui Kursus"
+          note="Simpan setelah perubahan kursus sudah benar."
+        />
       </form>
     </Form>
   );

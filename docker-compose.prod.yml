@@ -11,7 +11,7 @@ services:
         NEXT_PUBLIC_ASSET_URL_DEV: ${NEXT_PUBLIC_ASSET_URL_DEV:-http://localhost:8083}
         NEXT_PUBLIC_ASSET_URL_PROD: ${NEXT_PUBLIC_ASSET_URL_PROD:-https://be-brevet.taxcenterug.com}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://brevet.taxcenterug.com}
-    image: frontend-brevet:latest
+    image: ${DOCKER_IMAGE:-zidanindratama/frontend-brevet:latest}
     container_name: frontend-brevet-web
     restart: unless-stopped
     environment:

@@ -1,0 +1,66 @@
+name: Deploy Frontend Brevet
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend-brevet:latest
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_API_URL_PROD=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_ASSET_URL=${{ secrets.NEXT_PUBLIC_ASSET_URL }}
+            NEXT_PUBLIC_ASSET_URL_PROD=${{ secrets.NEXT_PUBLIC_ASSET_URL }}
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          script: |
+            set -e
+            mkdir -p /opt/brevet/frontend-brevet
+            cd /opt/brevet/frontend-brevet
+            if [ ! -d .git ]; then
+              git clone ${{ github.server_url }}/${{ github.repository }}.git .
+            else
+              git pull origin main
+            fi
+            cat > .env.production <<'EOF'
+            DOCKER_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/frontend-brevet:latest
+            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_API_URL_PROD=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_ASSET_URL=${{ secrets.NEXT_PUBLIC_ASSET_URL }}
+            NEXT_PUBLIC_ASSET_URL_PROD=${{ secrets.NEXT_PUBLIC_ASSET_URL }}
+            FRONTEND_HOST_PORT=${{ secrets.FRONTEND_HOST_PORT }}
+            EOF
+            docker compose -f docker-compose.prod.yml --env-file .env.production pull web
+            docker compose -f docker-compose.prod.yml --env-file .env.production up -d --force-recreate web
+            docker image prune -f

@@ -1,10 +1,15 @@
 import { cn } from "@/lib/utils";
 import { journeySteps } from "./about-data";
-import { SectionEyebrow, SectionReveal } from "./about-motion";
+import {
+  MicroCard,
+  MotionSection,
+  SectionEyebrow,
+  SectionReveal,
+} from "./about-motion";
 
 export function JourneySection() {
   return (
-    <section className="border-b bg-muted/25 py-24 md:py-32">
+    <MotionSection className="border-b bg-muted/25 py-24 md:py-32">
       <div className="mx-auto grid max-w-screen-xl gap-12 px-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1fr)] lg:items-center">
         <SectionReveal>
           <SectionEyebrow>Alur pengguna</SectionEyebrow>
@@ -17,13 +22,14 @@ export function JourneySection() {
           </p>
         </SectionReveal>
 
-        <SectionReveal delay={0.1} className="grid gap-3">
+        <div className="grid gap-3">
           {journeySteps.map((item, index) => (
-            <div
+            <MicroCard
               key={item}
+              delay={0.08 + index * 0.04}
               className={cn(
-                "rounded-lg border bg-card p-5",
-                index % 2 === 1 && "lg:translate-x-8",
+                "rounded-lg border bg-card p-5 transition-colors hover:border-primary/30 hover:bg-background",
+                index % 2 === 1 && "lg:ml-8",
               )}
             >
               <div className="flex items-center gap-4">
@@ -32,10 +38,10 @@ export function JourneySection() {
                 </span>
                 <p className="text-sm font-bold leading-6">{item}</p>
               </div>
-            </div>
+            </MicroCard>
           ))}
-        </SectionReveal>
+        </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }

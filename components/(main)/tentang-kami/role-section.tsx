@@ -1,9 +1,14 @@
 import { roleCards } from "./about-data";
-import { SectionEyebrow, SectionReveal } from "./about-motion";
+import {
+  MicroCard,
+  MotionSection,
+  SectionEyebrow,
+  SectionReveal,
+} from "./about-motion";
 
 export function RoleSection() {
   return (
-    <section className="border-b py-24 md:py-32">
+    <MotionSection className="border-b py-24 md:py-32">
       <div className="mx-auto max-w-screen-xl px-6">
         <SectionReveal className="max-w-3xl">
           <SectionEyebrow>Untuk siapa</SectionEyebrow>
@@ -16,8 +21,12 @@ export function RoleSection() {
           {roleCards.map((item, index) => {
             const Icon = item.icon;
             return (
-              <SectionReveal key={item.role} delay={index * 0.07}>
-                <article className="rounded-lg border bg-card p-6">
+              <MicroCard
+                key={item.role}
+                delay={index * 0.07}
+                className="rounded-lg border bg-card p-6 transition-colors hover:border-primary/30 hover:bg-background"
+              >
+                <article>
                   <div className="flex items-center justify-between gap-3">
                     <Icon className="size-6 text-primary" />
                     <span className="rounded-full border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground">
@@ -29,11 +38,11 @@ export function RoleSection() {
                     {item.desc}
                   </p>
                 </article>
-              </SectionReveal>
+              </MicroCard>
             );
           })}
         </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }

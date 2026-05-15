@@ -2,13 +2,13 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { SectionEyebrow, SectionReveal } from "./about-motion";
+import { MotionSection, SectionEyebrow, SectionReveal } from "./about-motion";
 
 export function CtaSection() {
   return (
-    <section className="py-24 md:py-32">
+    <MotionSection className="py-24 md:py-32">
       <div className="mx-auto max-w-screen-xl px-6">
-        <SectionReveal className="rounded-lg border bg-card p-8 md:p-10">
+        <SectionReveal className="rounded-lg border bg-card p-8 transition-colors hover:border-primary/30 md:p-10">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div>
               <SectionEyebrow>Mulai dari jadwal</SectionEyebrow>
@@ -34,6 +34,6 @@ export function CtaSection() {
           </div>
         </SectionReveal>
       </div>
-    </section>
+    </MotionSection>
   );
 }

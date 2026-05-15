@@ -1,11 +1,16 @@
 import { BadgeCheck, CheckCircle2 } from "lucide-react";
 
 import { trustPoints } from "./about-data";
-import { SectionEyebrow, SectionReveal } from "./about-motion";
+import {
+  MicroCard,
+  MotionSection,
+  SectionEyebrow,
+  SectionReveal,
+} from "./about-motion";
 
 export function TrustSection() {
   return (
-    <section className="border-b py-24 md:py-32">
+    <MotionSection className="border-b py-24 md:py-32">
       <div className="mx-auto grid max-w-screen-xl gap-12 px-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-start">
         <SectionReveal>
           <SectionEyebrow>Rasa aman</SectionEyebrow>
@@ -18,20 +23,27 @@ export function TrustSection() {
           </p>
         </SectionReveal>
 
-        <SectionReveal delay={0.1} className="rounded-lg border bg-card p-6">
+        <SectionReveal
+          delay={0.1}
+          className="rounded-lg border bg-card p-6 transition-colors hover:border-primary/30"
+        >
           <BadgeCheck className="size-6 text-primary" />
           <div className="mt-6 grid gap-4">
-            {trustPoints.map((item) => (
-              <div key={item} className="flex items-start gap-3">
+            {trustPoints.map((item, index) => (
+              <MicroCard
+                key={item}
+                delay={0.12 + index * 0.04}
+                className="flex items-start gap-3 rounded-md p-1"
+              >
                 <CheckCircle2 className="mt-1 size-5 shrink-0 text-primary" />
                 <p className="text-sm leading-6 text-muted-foreground">
                   {item}
                 </p>
-              </div>
+              </MicroCard>
             ))}
           </div>
         </SectionReveal>
       </div>
-    </section>
+    </MotionSection>
   );
 }

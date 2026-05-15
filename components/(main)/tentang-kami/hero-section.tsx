@@ -2,11 +2,16 @@ import Link from "next/link";
 import { ArrowUpRight, CheckCircle2, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { SectionEyebrow, SectionReveal } from "./about-motion";
+import {
+  MicroCard,
+  MotionSection,
+  SectionEyebrow,
+  SectionReveal,
+} from "./about-motion";
 
 export function HeroSection() {
   return (
-    <section className="border-b bg-[linear-gradient(135deg,oklch(0.985_0.006_78),oklch(0.955_0.01_86))] py-24 dark:bg-[linear-gradient(135deg,oklch(0.16_0.012_285),oklch(0.21_0.014_285))] md:py-32">
+    <MotionSection className="border-b bg-[linear-gradient(135deg,oklch(0.985_0.006_78),oklch(0.955_0.01_86))] py-24 dark:bg-[linear-gradient(135deg,oklch(0.16_0.012_285),oklch(0.21_0.014_285))] md:py-32">
       <div className="mx-auto grid max-w-screen-xl gap-12 px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
         <SectionReveal>
           <SectionEyebrow>Tentang LMS Brevet</SectionEyebrow>
@@ -31,7 +36,10 @@ export function HeroSection() {
           </div>
         </SectionReveal>
 
-        <SectionReveal delay={0.1} className="rounded-lg border bg-card p-6">
+        <SectionReveal
+          delay={0.1}
+          className="rounded-lg border bg-card p-6 transition-colors hover:border-primary/30"
+        >
           <ShieldCheck className="size-7 text-primary" />
           <h2 className="mt-6 text-2xl font-extrabold">
             Dibuat untuk mengurangi kebingungan peserta.
@@ -41,18 +49,21 @@ export function HeroSection() {
             tugas yang aktif, atau sertifikat yang bisa dicek.
           </p>
           <div className="mt-6 grid gap-3">
-            {["Pendaftaran", "Pembayaran", "Pembelajaran"].map((item) => (
-              <div
-                key={item}
-                className="flex items-center justify-between rounded-md border bg-background px-4 py-3 text-sm font-semibold"
-              >
-                {item}
-                <CheckCircle2 className="size-4 text-primary" />
-              </div>
-            ))}
+            {["Pendaftaran", "Pembayaran", "Pembelajaran"].map(
+              (item, index) => (
+                <MicroCard
+                  key={item}
+                  delay={0.16 + index * 0.04}
+                  className="flex items-center justify-between rounded-md border bg-background px-4 py-3 text-sm font-semibold"
+                >
+                  {item}
+                  <CheckCircle2 className="size-4 text-primary" />
+                </MicroCard>
+              ),
+            )}
           </div>
         </SectionReveal>
       </div>
-    </section>
+    </MotionSection>
   );
 }

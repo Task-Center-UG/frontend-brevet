@@ -1,9 +1,14 @@
 import { platformFeatures } from "./about-data";
-import { SectionEyebrow, SectionReveal } from "./about-motion";
+import {
+  MicroCard,
+  MotionSection,
+  SectionEyebrow,
+  SectionReveal,
+} from "./about-motion";
 
 export function FeatureSection() {
   return (
-    <section className="border-b bg-muted/25 py-24 md:py-32">
+    <MotionSection className="border-b bg-muted/25 py-24 md:py-32">
       <div className="mx-auto max-w-screen-xl px-6">
         <SectionReveal className="max-w-3xl">
           <SectionEyebrow>Fitur LMS</SectionEyebrow>
@@ -21,19 +26,21 @@ export function FeatureSection() {
           {platformFeatures.map((item, index) => {
             const Icon = item.icon;
             return (
-              <SectionReveal key={item.title} delay={index * 0.04}>
-                <div className="h-full rounded-lg border bg-card p-5 transition hover:border-primary/30 hover:bg-background">
-                  <Icon className="size-5 text-primary" />
-                  <h3 className="mt-6 text-base font-bold">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                    {item.desc}
-                  </p>
-                </div>
-              </SectionReveal>
+              <MicroCard
+                key={item.title}
+                delay={index * 0.04}
+                className="h-full rounded-lg border bg-card p-5 transition-colors hover:border-primary/30 hover:bg-background"
+              >
+                <Icon className="size-5 text-primary" />
+                <h3 className="mt-6 text-base font-bold">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                  {item.desc}
+                </p>
+              </MicroCard>
             );
           })}
         </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }

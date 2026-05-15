@@ -233,7 +233,7 @@ export default function CourseDetail() {
     <section className="w-full overflow-hidden bg-background text-foreground">
       <div className="relative border-b bg-[linear-gradient(135deg,oklch(0.985_0.006_78),oklch(0.955_0.01_86))] dark:bg-[linear-gradient(135deg,oklch(0.16_0.012_285),oklch(0.21_0.014_285))]">
         <div className="absolute inset-x-0 top-0 h-px bg-primary/40" />
-        <div className="mx-auto flex max-w-screen-xl flex-col gap-10 px-6 pb-16 pt-16 md:pb-20 md:pt-24">
+        <div className="mx-auto flex max-w-screen-xl flex-col gap-8 px-6 pb-14 pt-14 md:gap-10 md:pb-20 md:pt-24">
           <motion.div
             className="flex min-w-0 flex-col gap-7"
             initial={{ opacity: 0, y: 34 }}
@@ -260,33 +260,76 @@ export default function CourseDetail() {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
                 Tax Center Gunadarma
               </p>
-              <h1 className="max-w-6xl text-[2.75rem] font-extrabold leading-[0.98] tracking-normal text-foreground md:text-[4.5rem] lg:text-[6rem]">
+              <h1 className="max-w-6xl text-[2.35rem] font-extrabold leading-[1.02] tracking-normal text-foreground sm:text-[2.75rem] md:text-[4.5rem] lg:text-[6rem]">
                 {batch.title}
               </h1>
             </div>
           </motion.div>
 
           <motion.div
-            className="relative min-h-[360px] overflow-hidden rounded-xl border bg-muted shadow-2xl shadow-primary/10 md:min-h-[520px] lg:min-h-[620px]"
+            className="overflow-hidden rounded-xl border bg-card shadow-2xl shadow-primary/10"
             initial={{ opacity: 0, y: 38, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.82, delay: 0.1, ease: easeOutExpo }}
           >
-            <ImageWithFallback
-              src={batch.batch_thumbnail}
-              alt={batch.title}
-              fill
-              priority
-              className="object-cover transition duration-700 hover:scale-[1.04]"
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-foreground/70 via-foreground/10 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-5 p-5 text-background md:p-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="relative aspect-[4/3] overflow-hidden bg-muted md:aspect-[16/9] lg:min-h-[620px]">
+              <ImageWithFallback
+                src={batch.batch_thumbnail}
+                alt={batch.title}
+                fill
+                priority
+                sizes="(min-width: 1280px) 1280px, 100vw"
+                className="object-cover transition duration-700 hover:scale-[1.04]"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-foreground/70 via-foreground/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5 text-background md:p-8">
+                <div className="max-w-xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
+                    Gelombang aktif
+                  </p>
+                  <p className="mt-2 text-2xl font-extrabold leading-tight md:text-4xl">
+                    {formatPeriode(batch.start_at, batch.end_at)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 bg-card p-4 md:grid-cols-3 md:p-5 lg:hidden">
+              {quickFacts.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.label}
+                    className="group flex min-h-24 flex-col justify-between rounded-lg border bg-background p-4 text-foreground transition duration-300 hover:-translate-y-1 hover:border-primary/40"
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 0.18 + index * 0.06,
+                      ease: easeOutExpo,
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {item.label}
+                      </span>
+                      <Icon className="size-4 text-primary transition-transform duration-300 group-hover:rotate-6" />
+                    </div>
+                    <p className="pt-4 text-sm font-semibold leading-6">
+                      {item.value}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <div className="hidden gap-5 bg-card p-5 md:p-8 lg:flex lg:items-end lg:justify-between">
               <div className="max-w-xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
-                  Gelombang aktif
+                  Ringkasan cepat
                 </p>
-                <p className="mt-2 text-2xl font-extrabold leading-tight md:text-4xl">
-                  {formatPeriode(batch.start_at, batch.end_at)}
+                <p className="mt-2 text-2xl font-extrabold leading-tight text-foreground md:text-3xl">
+                  Jadwal, waktu, dan lokasi kelas.
                 </p>
               </div>
               <div className="grid gap-3 md:grid-cols-3 lg:w-[680px]">
@@ -295,7 +338,7 @@ export default function CourseDetail() {
                   return (
                     <motion.div
                       key={item.label}
-                      className="group flex min-h-28 flex-col justify-between rounded-xl border border-background/18 bg-background/92 p-4 text-foreground shadow-lg transition duration-300 hover:-translate-y-1 hover:border-primary/40"
+                      className="group flex min-h-28 flex-col justify-between rounded-lg border bg-background p-4 text-foreground transition duration-300 hover:-translate-y-1 hover:border-primary/40"
                       initial={{ opacity: 0, y: 24 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
@@ -335,9 +378,9 @@ export default function CourseDetail() {
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Ringkasan Program
               </p>
-              <h2 className="max-w-3xl text-3xl font-extrabold leading-tight md:text-5xl">
+              <p className="max-w-3xl text-xl font-medium text-muted-foreground md:text-2xl">
                 Detail yang perlu kamu tahu sebelum daftar.
-              </h2>
+              </p>
             </div>
 
             <div

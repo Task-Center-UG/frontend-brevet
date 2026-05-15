@@ -3,7 +3,7 @@ export const DEV_API_URL =
 
 export const PROD_API_URL =
   process.env.NEXT_PUBLIC_API_URL_PROD ??
-  "https://be-brevet.tcugapps.com/api/v1";
+  "https://be-brevet.taxcenterug.com/api/v1";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??

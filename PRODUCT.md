@@ -424,7 +424,7 @@ NEXT_PUBLIC_ASSET_URL_DEV=http://localhost:8083
 Production defaults:
 
 ```env
-NEXT_PUBLIC_API_URL_PROD=https://be-brevet.tcugapps.com/api/v1
+NEXT_PUBLIC_API_URL_PROD=https://be-brevet.taxcenterug.com/api/v1
 ```
 
 API helpers:

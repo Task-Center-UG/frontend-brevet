@@ -1,7 +1,17 @@
 import Footer from "@/components/(main)/footer";
 import CourseScheduleTable from "@/components/(main)/jadwal-program/course-schedule-table";
 import Navbar from "@/components/(main)/navbar";
+import { createPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
 import React, { Suspense } from "react";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Jadwal Program Brevet Pajak",
+  description:
+    "Lihat jadwal program brevet pajak Tax Center Universitas Gunadarma, pilihan kelas, gelombang, biaya, dan informasi pendaftaran terbaru.",
+  path: "/jadwal-program",
+  keywords: ["jadwal brevet pajak", "jadwal kelas brevet", "biaya brevet pajak"],
+});
 
 const ProgramSchedulePage = () => {
   return (

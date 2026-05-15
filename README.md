@@ -110,6 +110,52 @@ Lint:
 npm run lint
 ```
 
+## Docker Production Deploy
+
+Frontend production berjalan sebagai Next.js standalone server di port container `3000`.
+
+Siapkan env production:
+
+```bash
+cp .env.production.example .env.production
+nano .env.production
+```
+
+Minimal isi `.env.production` untuk VPS:
+
+```env
+NEXT_PUBLIC_SITE_URL=https://brevet.taxcenterug.com
+NEXT_PUBLIC_API_URL=https://be-brevet.taxcenterug.com/api/v1
+NEXT_PUBLIC_ASSET_URL=https://be-brevet.taxcenterug.com
+FRONTEND_HOST_PORT=3000
+```
+
+Build dan jalankan container:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+```
+
+Cek status:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production ps
+docker logs -f frontend-brevet-web
+```
+
+Restart setelah update kode atau env `NEXT_PUBLIC_*`:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+```
+
+Catatan VPS Hostinger:
+
+- Service expose hanya ke `127.0.0.1:${FRONTEND_HOST_PORT:-3000}` agar aman di belakang reverse proxy.
+- Arahkan Nginx/Apache reverse proxy domain frontend ke `http://127.0.0.1:3000`.
+- Jika nilai `NEXT_PUBLIC_*` berubah, wajib rebuild image karena Next.js menanam nilai ini saat `next build`.
+- Backend production default diarahkan ke `https://be-brevet.taxcenterug.com`.
+
 ## Account Setup
 
 Default seeded accounts:

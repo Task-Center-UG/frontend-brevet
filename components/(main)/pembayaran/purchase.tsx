@@ -112,7 +112,7 @@ export default function Purchase({ batchSlug }: Props) {
   if (isLoading) {
     return (
       <section className="w-full bg-background pt-16 md:pt-24">
-        <div className="mx-auto grid max-w-screen-xl gap-10 px-6 pb-24 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="mx-auto grid max-w-screen-xl gap-10 px-5 pb-24 sm:px-6 lg:px-8 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="flex flex-col gap-6">
             <Skeleton className="h-5 w-48" />
             <Skeleton className="h-24 w-full max-w-4xl" />
@@ -247,7 +247,7 @@ export default function Purchase({ batchSlug }: Props) {
     <section className="w-full overflow-hidden bg-background text-foreground">
       <div className="relative border-b bg-[linear-gradient(135deg,oklch(0.985_0.006_78),oklch(0.955_0.01_86))] dark:bg-[linear-gradient(135deg,oklch(0.16_0.012_285),oklch(0.21_0.014_285))]">
         <div className="absolute inset-x-0 top-0 h-px bg-primary/40" />
-        <div className="mx-auto flex max-w-screen-xl flex-col gap-10 px-6 pb-16 pt-16 md:pb-20 md:pt-24">
+        <div className="mx-auto flex max-w-screen-xl flex-col gap-8 px-5 pb-14 pt-12 sm:px-6 md:gap-10 md:pb-16 md:pt-20 lg:px-8 xl:pb-20 xl:pt-24">
           <motion.div
             className="flex flex-col gap-7"
             initial={{ opacity: 0, y: 34 }}
@@ -283,7 +283,7 @@ export default function Purchase({ batchSlug }: Props) {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
                 Pembayaran Program
               </p>
-              <h1 className="max-w-6xl text-[2.7rem] font-extrabold leading-[0.98] tracking-normal text-foreground md:text-[4.5rem] lg:text-[5.8rem]">
+              <h1 className="max-w-5xl text-[2.45rem] font-extrabold leading-[1.02] tracking-normal text-foreground sm:text-5xl md:text-[4rem] lg:text-[4.65rem]">
                 {batch.title}
               </h1>
               <p className="max-w-3xl text-base leading-8 text-muted-foreground md:text-lg">
@@ -294,62 +294,74 @@ export default function Purchase({ batchSlug }: Props) {
           </motion.div>
 
           <motion.div
-            className="relative min-h-[360px] overflow-hidden rounded-xl border bg-muted shadow-2xl shadow-primary/10 md:min-h-[520px] lg:min-h-[620px]"
+            className="grid gap-4 lg:grid-cols-[minmax(0,1.12fr)_minmax(280px,0.58fr)] lg:items-stretch"
             initial={{ opacity: 0, y: 38, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.82, delay: 0.08, ease: easeOutExpo }}
           >
-            <ImageWithFallback
-              src={batch.batch_thumbnail || "/placeholder.svg"}
-              alt={batch.title}
-              fill
-              priority
-              className="object-cover transition duration-700 hover:scale-[1.04]"
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-foreground/70 via-foreground/10 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-5 p-5 text-background md:p-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-xl">
+            <div className="relative min-h-[300px] overflow-hidden rounded-xl border bg-muted shadow-2xl shadow-primary/10 sm:min-h-[360px] md:min-h-[460px] lg:min-h-[540px]">
+              <ImageWithFallback
+                src={batch.batch_thumbnail || "/placeholder.svg"}
+                alt={batch.title}
+                fill
+                priority
+                className="object-cover transition duration-700 hover:scale-[1.04]"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-foreground/72 via-foreground/12 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5 text-background md:p-8">
+                <div className="max-w-xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
+                    Review sebelum bayar
+                  </p>
+                  <p className="mt-2 text-2xl font-extrabold leading-tight md:text-4xl">
+                    {regPeriodText}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="flex flex-col justify-end rounded-xl border bg-card p-4 text-card-foreground lg:min-h-[170px]">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
-                  Review sebelum bayar
+                  Detail utama
                 </p>
-                <p className="mt-2 text-2xl font-extrabold leading-tight md:text-4xl">
-                  {regPeriodText}
+                <p className="mt-3 text-lg font-extrabold leading-tight text-foreground">
+                  Jadwal, waktu, dan lokasi sudah disiapkan sebelum tagihan
+                  dibuat.
                 </p>
               </div>
-              <div className="grid gap-3 md:grid-cols-3 lg:w-[680px]">
-                {quickFacts.map((item, index) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.div
-                      key={item.label}
-                      className="group flex min-h-28 flex-col justify-between rounded-xl border border-background/18 bg-background/92 p-4 text-foreground shadow-lg transition duration-300 hover:-translate-y-1 hover:border-primary/40"
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.55,
-                        delay: 0.16 + index * 0.08,
-                        ease: easeOutExpo,
-                      }}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {item.label}
-                        </span>
-                        <Icon className="size-4 text-primary transition-transform duration-300 group-hover:rotate-6" />
-                      </div>
-                      <p className="text-sm font-semibold leading-6">
-                        {item.value}
-                      </p>
-                    </motion.div>
-                  );
-                })}
-              </div>
+              {quickFacts.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.label}
+                    className="group flex min-h-28 flex-col justify-between rounded-xl border bg-card p-4 text-card-foreground transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg"
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.55,
+                      delay: 0.16 + index * 0.08,
+                      ease: easeOutExpo,
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {item.label}
+                      </span>
+                      <Icon className="size-4 text-primary transition-transform duration-300 group-hover:rotate-6" />
+                    </div>
+                    <p className="text-sm font-semibold leading-6">
+                      {item.value}
+                    </p>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-screen-xl gap-10 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_380px] lg:py-24">
+      <div className="mx-auto grid max-w-screen-xl gap-10 px-5 py-14 sm:px-6 lg:px-8 lg:py-20 xl:grid-cols-[minmax(0,1fr)_380px] xl:py-24">
         <main className="flex min-w-0 flex-col gap-10">
           <motion.section
             className="grid gap-4 md:grid-cols-3"
@@ -390,7 +402,7 @@ export default function Purchase({ batchSlug }: Props) {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                   Rincian Pendaftaran
                 </p>
-                <h2 className="text-3xl font-extrabold leading-tight md:text-5xl">
+                <h2 className="text-3xl font-extrabold leading-tight md:text-4xl">
                   Pastikan data gelombang sudah cocok.
                 </h2>
               </div>
@@ -460,7 +472,7 @@ export default function Purchase({ batchSlug }: Props) {
           </Alert>
         </main>
 
-        <aside className="lg:sticky lg:top-24 lg:h-fit">
+        <aside className="xl:sticky xl:top-24 xl:h-fit">
           <motion.div
             className="overflow-hidden rounded-xl border bg-card shadow-xl shadow-primary/8"
             initial={{ opacity: 0, y: 30 }}

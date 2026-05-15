@@ -45,7 +45,7 @@ const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1];
 type RegStatus = "open" | "not_yet" | "closed" | "unknown";
 
 const groupLabel = (
-  groupType: "mahasiswa_gunadarma" | "mahasiswa_non_gunadarma" | "umum"
+  groupType: "mahasiswa_gunadarma" | "mahasiswa_non_gunadarma" | "umum",
 ) => {
   if (groupType === "mahasiswa_gunadarma") return "Mahasiswa Gunadarma";
   if (groupType === "mahasiswa_non_gunadarma") return "Mahasiswa Non-Gunadarma";
@@ -54,14 +54,6 @@ const groupLabel = (
 
 const dayLabel = (day: string) =>
   DAY_OPTIONS.find((option) => option.value === day)?.label || day;
-
-const stripHtml = (value?: string) =>
-  value
-    ? value
-        .replace(/<[^>]*>/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-    : "";
 
 const statusCopy: Record<RegStatus, { label: string; tone: string }> = {
   open: {
@@ -158,7 +150,7 @@ export default function CourseDetail() {
       ? `${format(regStart, "dd MMM yyyy", { locale: idLocale })} sampai ${format(
           regEnd,
           "dd MMM yyyy",
-          { locale: idLocale }
+          { locale: idLocale },
         )}`
       : "Belum tersedia";
 
@@ -167,7 +159,9 @@ export default function CourseDetail() {
     .slice(0, 5)
     .replace(":", ".")} WIB`;
   const location =
-    batch.course_type === "online" ? "Online, Zoom atau Google Meet" : batch.room;
+    batch.course_type === "online"
+      ? "Online, Zoom atau Google Meet"
+      : batch.room;
   const buttonDisabled = regStatus !== "open";
   const buttonLabel =
     regStatus === "open"
@@ -185,17 +179,13 @@ export default function CourseDetail() {
             ((now.getTime() - regStart.getTime()) /
               (regEnd.getTime() - regStart.getTime())) *
               100,
-            5
+            5,
           ),
-          100
+          100,
         )
       : regStatus === "closed"
         ? 100
         : 0;
-
-  const summary =
-    stripHtml(batch.description) ||
-    "Program brevet pajak resmi Tax Center Universitas Gunadarma dengan kurikulum praktis dan pembelajaran terstruktur.";
 
   const quickFacts = [
     {
@@ -253,7 +243,10 @@ export default function CourseDetail() {
             <div className="flex flex-wrap items-center gap-3">
               <Badge
                 variant="outline"
-                className={cn("rounded-full border px-3 py-1", statusCopy[regStatus].tone)}
+                className={cn(
+                  "rounded-full border px-3 py-1",
+                  statusCopy[regStatus].tone,
+                )}
               >
                 <Sparkles />
                 {statusCopy[regStatus].label}
@@ -270,9 +263,6 @@ export default function CourseDetail() {
               <h1 className="max-w-6xl text-[2.75rem] font-extrabold leading-[0.98] tracking-normal text-foreground md:text-[4.5rem] lg:text-[6rem]">
                 {batch.title}
               </h1>
-              <p className="max-w-3xl text-base leading-8 text-muted-foreground md:text-lg">
-                {summary}
-              </p>
             </div>
           </motion.div>
 
@@ -381,7 +371,9 @@ export default function CourseDetail() {
                   <p className="text-xs font-medium text-muted-foreground">
                     {item.label}
                   </p>
-                  <p className="mt-2 text-lg font-bold leading-7">{item.value}</p>
+                  <p className="mt-2 text-lg font-bold leading-7">
+                    {item.value}
+                  </p>
                 </motion.div>
               );
             })}
@@ -433,11 +425,16 @@ export default function CourseDetail() {
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                     Tiket Kelas
                   </p>
-                  <h2 className="mt-2 text-2xl font-extrabold">Amankan kursi</h2>
+                  <h2 className="mt-2 text-2xl font-extrabold">
+                    Amankan kursi
+                  </h2>
                 </div>
                 <Badge
                   variant="outline"
-                  className={cn("rounded-full px-3 py-1", statusCopy[regStatus].tone)}
+                  className={cn(
+                    "rounded-full px-3 py-1",
+                    statusCopy[regStatus].tone,
+                  )}
                 >
                   {batch.course_type === "online" ? "Online" : "Offline"}
                 </Badge>
@@ -446,10 +443,18 @@ export default function CourseDetail() {
               <Separator />
 
               <div className="flex flex-col gap-4">
-                <InfoRow icon={CalendarDays} label="Pendaftaran" value={regPeriodText} />
+                <InfoRow
+                  icon={CalendarDays}
+                  label="Pendaftaran"
+                  value={regPeriodText}
+                />
                 <InfoRow icon={Clock} label="Jam" value={scheduleTime} />
                 <InfoRow icon={MapPin} label="Lokasi" value={location} />
-                <InfoRow icon={Users} label="Kapasitas" value={`${batch.quota} peserta`} />
+                <InfoRow
+                  icon={Users}
+                  label="Kapasitas"
+                  value={`${batch.quota} peserta`}
+                />
               </div>
 
               <div className="flex flex-col gap-2">
@@ -467,7 +472,11 @@ export default function CourseDetail() {
 
               <div className="flex flex-wrap gap-2">
                 {batch.batch_groups.map((group) => (
-                  <Badge key={group.id} variant="secondary" className="rounded-full">
+                  <Badge
+                    key={group.id}
+                    variant="secondary"
+                    className="rounded-full"
+                  >
                     <UserCheck />
                     {groupLabel(group.group_type)}
                   </Badge>

@@ -12,7 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export default function DashboardNewsage() {
+export default function DashboardProfilePage() {
   return (
     <section>
       <header className="flex h-16 shrink-0 items-center gap-2">
@@ -29,13 +29,13 @@ export default function DashboardNewsage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Profile</BreadcrumbPage>
+                <BreadcrumbPage>Profil</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0 lg:p-6 lg:pt-0">
         <MyProfileForm />
       </div>
     </section>

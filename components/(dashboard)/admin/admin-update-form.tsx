@@ -1,39 +1,24 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import {
+  ManagedUserForm,
+  ManagedUserFormSkeleton,
+} from "@/components/(dashboard)/_shared/managed-user-form";
+import { toAssetUrl } from "@/helpers/api-config";
+import { useFileUploader } from "@/hooks/use-file-uploader";
 import { useGetData } from "@/hooks/use-get-data";
 import { usePutData } from "@/hooks/use-put-data";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
-import { DateTimePicker } from "@/components/ui/date-time-picker";
-import { useFileUploader } from "@/hooks/use-file-uploader";
+import { normalizeToUTCDateOnly } from "../profile/_libs/normalize-to-utc-date";
 import { TAdmin } from "./_types/admin-type";
 import {
   TUpdateAdmin,
   updateAdminSchema,
 } from "./_schemas/update-admin-schema";
-import { normalizeToUTCDateOnly } from "../profile/_libs/normalize-to-utc-date";
 
 type Props = {
   adminId: string;
@@ -64,22 +49,25 @@ const AdminUpdateForm = ({ adminId }: Props) => {
     },
   });
 
-  const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "documents" | "images",
-    field: keyof TUpdateAdmin
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = await uploadFile(file, type);
-    form.setValue(field, url || "", { shouldValidate: true });
-  };
-
   const mutation = usePutData({
     queryKey: "admin",
     dataProtected: `users/${adminId}`,
     successMessage: "Data admin berhasil diperbarui!",
   });
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    type: "documents" | "images",
+    field: string,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const url = await uploadFile(file, type);
+    form.setValue(field as keyof TUpdateAdmin, url || "", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
   const onSubmit = (values: TUpdateAdmin) => {
     const { birth_date, ...rest } = values;
@@ -104,161 +92,19 @@ const AdminUpdateForm = ({ adminId }: Props) => {
     }
   }, [admin, form]);
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <ManagedUserFormSkeleton />;
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          form.handleSubmit(onSubmit, (errors) => {
-            console.log("❌ Validation errors:", errors);
-            toast.error("Ada isian yang belum benar.");
-          })(e);
-        }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Update Admin</CardTitle>
-            <CardDescription>
-              Admin dapat memperbarui datanya di bawah ini.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama Lengkap</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Contoh: Ahmad Rafi" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>No. Telepon</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Contoh: 081234567890" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="avatar"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Avatar</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(e, "images", "avatar")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="institution"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Asal Institusi</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Contoh: Universitas Gunadarma"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="origin"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Asal Daerah</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Contoh: Jakarta" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="birth_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tanggal Lahir</FormLabel>
-                  <FormControl>
-                    <DateTimePicker
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Pilih tanggal lahir"
-                      granularity="day"
-                      displayFormat={{ hour24: "PPP" }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Alamat</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Contoh: Jl. Kenanga No. 88, Jakarta"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter>
-            <Button
-              type="submit"
-              disabled={mutation.isPending}
-              className="w-full md:w-fit"
-              variant={"orange"}
-            >
-              {mutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menyimpan...
-                </>
-              ) : (
-                "Simpan Perubahan"
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-      </form>
-    </Form>
+    <ManagedUserForm
+      form={form}
+      role="admin"
+      mode="update"
+      isPending={mutation.isPending}
+      onSubmit={onSubmit}
+      onInvalid={() => toast.error("Ada isian yang belum benar.")}
+      avatarUrl={toAssetUrl(form.watch("avatar") || admin?.avatar)}
+      handleFileChange={handleFileChange}
+    />
   );
 };
 

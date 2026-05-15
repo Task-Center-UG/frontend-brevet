@@ -122,7 +122,9 @@ const ProgramSayaDatatable = () => {
                     className="gap-2 pl-2.5"
                     onClick={(event) => {
                       event.preventDefault();
-                      page > 1 && updateQuery("page", String(page - 1));
+                      if (page > 1) {
+                        updateQuery("page", String(page - 1));
+                      }
                     }}
                   >
                     <ChevronsLeft className="size-4" />
@@ -155,8 +157,9 @@ const ProgramSayaDatatable = () => {
                     className="gap-2 pr-2.5"
                     onClick={(event) => {
                       event.preventDefault();
-                      page < totalPages &&
+                      if (page < totalPages) {
                         updateQuery("page", String(page + 1));
+                      }
                     }}
                   >
                     <span>Berikutnya</span>

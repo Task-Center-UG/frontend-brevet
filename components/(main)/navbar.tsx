@@ -38,6 +38,7 @@ const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const mobileLinks = [
   { label: "Beranda", href: "/" },
+  { label: "Tentang Kami", href: "/tentang-kami" },
   { label: "Jadwal Program", href: "/jadwal-program" },
   { label: "Jadwal Workshop", href: "/coming-soon" },
   { label: "Berita", href: "/berita" },

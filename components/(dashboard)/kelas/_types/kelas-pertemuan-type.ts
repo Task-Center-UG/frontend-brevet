@@ -44,6 +44,9 @@ export type TBatchMeeting = {
   title: string;
   description: string;
   meeting_type: TMeetingType;
+  start_at: string;
+  end_at: string;
+  is_open: boolean;
   teachers: {
     id: string;
     name: string;

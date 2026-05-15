@@ -5,7 +5,9 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { VerifyCodeSchema } from "./_schema/verify-code-schema";
+import { Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -20,9 +22,8 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw } from "lucide-react";
 import { usePostData } from "@/hooks/use-post-data";
+import { VerifyCodeSchema } from "./_schema/verify-code-schema";
 
 const VerifyCodeForm = () => {
   const searchParams = useSearchParams();
@@ -67,11 +68,30 @@ const VerifyCodeForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Verifikasi Email</h1>
-          <p className="text-sm text-muted-foreground">
-            Masukkan kode OTP yang dikirim ke email Kamu.
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            OTP Email
           </p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-normal">
+            Verifikasi email
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Masukkan 6 digit kode dari email. Setelah valid, kamu bisa masuk ke
+            dashboard.
+          </p>
+        </div>
+
+        <div className="rounded-md border bg-background p-4">
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="mt-0.5 size-5 text-primary" />
+            <div>
+              <p className="text-sm font-bold">Kode hanya untuk akun ini</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Jika kode tidak masuk, gunakan kirim ulang tanpa mengubah data
+                pendaftaran.
+              </p>
+            </div>
+          </div>
         </div>
 
         <FormField
@@ -82,19 +102,19 @@ const VerifyCodeForm = () => {
               <FormLabel>Kode OTP</FormLabel>
               <FormControl>
                 <InputOTP maxLength={6} {...field} className="w-full">
-                  <InputOTPGroup className="w-full flex justify-between gap-2">
-                    <InputOTPSlot index={0} className="w-full" />
-                    <InputOTPSlot index={1} className="w-full" />
+                  <InputOTPGroup className="w-full justify-between gap-2">
+                    <InputOTPSlot index={0} className="h-12 w-full" />
+                    <InputOTPSlot index={1} className="h-12 w-full" />
                   </InputOTPGroup>
                   <InputOTPSeparator />
-                  <InputOTPGroup className="w-full flex justify-between gap-2">
-                    <InputOTPSlot index={2} className="w-full" />
-                    <InputOTPSlot index={3} className="w-full" />
+                  <InputOTPGroup className="w-full justify-between gap-2">
+                    <InputOTPSlot index={2} className="h-12 w-full" />
+                    <InputOTPSlot index={3} className="h-12 w-full" />
                   </InputOTPGroup>
                   <InputOTPSeparator />
-                  <InputOTPGroup className="w-full flex justify-between gap-2">
-                    <InputOTPSlot index={4} className="w-full" />
-                    <InputOTPSlot index={5} className="w-full" />
+                  <InputOTPGroup className="w-full justify-between gap-2">
+                    <InputOTPSlot index={4} className="h-12 w-full" />
+                    <InputOTPSlot index={5} className="h-12 w-full" />
                   </InputOTPGroup>
                 </InputOTP>
               </FormControl>
@@ -103,19 +123,17 @@ const VerifyCodeForm = () => {
           )}
         />
 
-        <Button
-          type="submit"
-          variant="orange"
-          disabled={isVerifying}
-          className="w-full"
-        >
+        <Button type="submit" disabled={isVerifying} className="w-full">
           {isVerifying ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Memverifikasi...
+              <Loader2 className="animate-spin" />
+              Memverifikasi
             </>
           ) : (
-            "Verifikasi Sekarang"
+            <>
+              <ShieldCheck />
+              Verifikasi Sekarang
+            </>
           )}
         </Button>
 
@@ -124,15 +142,15 @@ const VerifyCodeForm = () => {
           <button
             type="button"
             onClick={onResend}
-            disabled={isResending}
-            className="text-orange-600 hover:underline font-medium inline-flex items-center"
+            disabled={isResending || !token}
+            className="inline-flex items-center gap-1 font-semibold text-primary underline-offset-4 hover:underline disabled:pointer-events-none disabled:opacity-50"
           >
             {isResending ? (
-              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <RefreshCw className="mr-1 h-4 w-4" />
+              <RefreshCw className="size-4" />
             )}
-            Kirim Ulang Kode
+            Kirim ulang
           </button>
         </div>
       </form>

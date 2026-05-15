@@ -5,13 +5,13 @@ import Link from "next/link";
 import {
   ArrowRight,
   BookOpenCheck,
+  CalendarDays,
   ChartBarIncreasing,
   CheckCircle2,
   ClipboardList,
   Clock4,
   FileQuestion,
   FileText,
-  GraduationCap,
   LockKeyhole,
   Paperclip,
   Settings,
@@ -85,6 +85,12 @@ export default function KelasCard({
             <h2 className="mt-3 text-xl font-extrabold leading-tight tracking-normal">
               {meeting.title}
             </h2>
+            <div className="mt-3 flex flex-wrap gap-2 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1">
+                <CalendarDays className="size-4 text-primary" />
+                {formatWIB(meeting.start_at)} sampai {formatWIB(meeting.end_at)}
+              </span>
+            </div>
             {meeting.description ? (
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                 {meeting.description}

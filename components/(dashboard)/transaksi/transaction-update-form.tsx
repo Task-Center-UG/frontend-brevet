@@ -1,13 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+  CheckCircle,
+  CreditCard,
+  FileCheck2,
+  Loader2,
+  Mail,
+  Phone,
+  ReceiptText,
+  UserRound,
+  XCircle,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Form,
   FormControl,
@@ -17,22 +26,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
 import { useGetData } from "@/hooks/use-get-data";
 import { usePatchData } from "@/hooks/use-patch-data";
-import { TTransaction } from "./_types/transaction-type";
-import { formatRupiah } from "../pembayaran/_libs/format-rupiah";
+import { cn } from "@/lib/utils";
 import { formatDateIndo } from "../pembayaran/_libs/format-date-indo";
-import Link from "next/link";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { formatRupiah } from "../pembayaran/_libs/format-rupiah";
+import { TTransaction } from "./_types/transaction-type";
 
-// Schema dan Tipe Zod
 const UpdateStatusSchema = z.object({
   payment_status: z.enum(["paid", "rejected"], {
     required_error: "Status pembayaran wajib dipilih.",
@@ -44,6 +48,15 @@ type Props = {
   transactionId: string;
 };
 
+const statusLabel: Record<TTransaction["payment_status"], string> = {
+  pending: "Menunggu Pembayaran",
+  waiting_confirmation: "Menunggu Konfirmasi",
+  paid: "Berhasil",
+  rejected: "Ditolak",
+  expired: "Kadaluarsa",
+  cancelled: "Dibatalkan",
+};
+
 export default function TransactionUpdateForm({ transactionId }: Props) {
   const [isReady, setIsReady] = useState(false);
 
@@ -52,8 +65,7 @@ export default function TransactionUpdateForm({ transactionId }: Props) {
     dataProtected: `purchases/${transactionId}`,
     options: { refetchOnWindowFocus: false },
   });
-
-  const transaction: TTransaction = data?.data?.data;
+  const transaction: TTransaction | undefined = data?.data?.data;
 
   const form = useForm<UpdateStatusFormData>({
     resolver: zodResolver(UpdateStatusSchema),
@@ -84,182 +96,252 @@ export default function TransactionUpdateForm({ transactionId }: Props) {
     }
   }, [transaction, form]);
 
-  if (!isReady) return null;
+  if (isFetching || !isReady || !transaction) {
+    return (
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <Skeleton className="h-[520px] rounded-lg" />
+        <Skeleton className="h-[520px] rounded-lg" />
+      </div>
+    );
+  }
+
+  const total = transaction.price.price + transaction.unique_code;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Detail Transaksi</CardTitle>
-            <CardDescription>
-              Lihat data pendaftaran, bukti bayar, dan ubah status transaksi.
-            </CardDescription>
-          </CardHeader>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]"
+      >
+        <section className="rounded-lg border bg-card p-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                Review Pembayaran
+              </p>
+              <h1 className="mt-2 text-2xl font-extrabold tracking-normal">
+                Bukti transfer
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                Cocokkan nominal, pemilik rekening, dan bukti transfer sebelum
+                mengubah status.
+              </p>
+            </div>
+            <span className="inline-flex w-fit items-center rounded-full border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+              {statusLabel[transaction.payment_status]}
+            </span>
+          </div>
 
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                  Program
-                </p>
-                <div className="flex items-center gap-4">
+          <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="rounded-md border bg-background p-4">
+              <p className="text-sm font-bold">Bukti Pembayaran</p>
+              {transaction.payment_proof ? (
+                <Link
+                  href={transaction.payment_proof}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <ImageWithFallback
-                    src={transaction.batch.batch_thumbnail}
-                    alt={transaction.batch.title}
-                    width={100}
-                    height={100}
-                    className="rounded-lg border object-cover h-24 w-36"
+                    src={transaction.payment_proof}
+                    alt="Bukti pembayaran"
+                    width={720}
+                    height={900}
+                    className="mt-3 max-h-[520px] w-full rounded-md border object-contain"
                   />
-                  <div className="space-y-1">
-                    <p className="font-semibold text-base">
-                      {transaction.batch.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDateIndo(transaction.batch.start_at)} -{" "}
-                      {formatDateIndo(transaction.batch.end_at)}
-                    </p>
-                    <p className="text-sm text-muted-foreground capitalize">
-                      Tipe: {transaction.batch.course_type}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                  Mahasiswa
-                </p>
-                <div className="space-y-1">
-                  <p className="text-base font-semibold">
-                    {transaction.user.name}
+                </Link>
+              ) : (
+                <div className="mt-3 flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-muted/30 p-6 text-center">
+                  <ReceiptText className="size-8 text-muted-foreground" />
+                  <p className="mt-4 font-semibold">
+                    Peserta belum mengunggah bukti
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {transaction.user.email}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {transaction.user.phone}
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    Tunggu bukti transfer sebelum menyetujui pembayaran.
                   </p>
                 </div>
-              </div>
+              )}
             </div>
 
-            <hr />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-muted-foreground mb-1">
-                  Bukti Pembayaran
-                </p>
-                {transaction?.payment_status === "pending" ? (
-                  <p className="text-sm text-destructive">
-                    Belum ada bukti pembayaran.
-                  </p>
-                ) : (
-                  <Link
-                    href={transaction?.payment_proof || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ImageWithFallback
-                      src={transaction?.payment_proof || "/placeholder.svg"}
-                      alt="Bukti Pembayaran"
-                      width={500}
-                      height={300}
-                      className="rounded-lg border max-h-60 object-contain"
-                    />
-                  </Link>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-muted-foreground mb-1">
-                  Total Harga
-                </p>
-                <p className="text-lg font-bold text-primary">
-                  {formatRupiah(
-                    transaction.price.price + transaction.unique_code
-                  )}
-                </p>
-              </div>
+            <div className="space-y-3">
+              <InfoBlock
+                icon={CreditCard}
+                label="Total bayar"
+                value={formatRupiah(total)}
+                strong
+              />
+              <InfoBlock
+                icon={UserRound}
+                label="Nama rekening"
+                value={transaction.buyer_bank_account_name || "-"}
+              />
+              <InfoBlock
+                icon={ReceiptText}
+                label="Nomor rekening"
+                value={transaction.buyer_bank_account_number || "-"}
+              />
+              <InfoBlock
+                icon={FileCheck2}
+                label="Tanggal transaksi"
+                value={formatDateIndo(transaction.created_at)}
+              />
             </div>
+          </div>
+        </section>
 
-            <hr />
+        <aside className="space-y-5">
+          <section className="rounded-lg border bg-card p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              Peserta
+            </p>
+            <h2 className="mt-2 text-xl font-extrabold">
+              {transaction.user.name}
+            </h2>
+            <div className="mt-4 grid gap-3 text-sm">
+              <span className="inline-flex items-center gap-2 text-muted-foreground">
+                <Mail className="size-4 text-primary" />
+                {transaction.user.email}
+              </span>
+              <span className="inline-flex items-center gap-2 text-muted-foreground">
+                <Phone className="size-4 text-primary" />
+                {transaction.user.phone || "-"}
+              </span>
+            </div>
+          </section>
 
+          <section className="rounded-lg border bg-card p-5">
+            <ImageWithFallback
+              src={transaction.batch.batch_thumbnail}
+              alt={transaction.batch.title}
+              width={640}
+              height={360}
+              className="h-40 w-full rounded-md border object-cover"
+            />
+            <h2 className="mt-4 text-lg font-extrabold leading-6">
+              {transaction.batch.title}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {formatDateIndo(transaction.batch.start_at)} sampai{" "}
+              {formatDateIndo(transaction.batch.end_at)}
+            </p>
+          </section>
+
+          <section className="rounded-lg border bg-card p-5">
             <FormField
               control={form.control}
               name="payment_status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base font-semibold">
-                    Status Pembayaran
+                  <FormLabel className="text-base font-bold">
+                    Keputusan Admin
                   </FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
                       value={field.value}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                      className="mt-3 grid gap-3"
                     >
                       {[
                         {
                           id: "paid",
-                          label: "Berhasil",
-                          icon: (
-                            <CheckCircle className="w-6 h-6 text-green-500 mb-2" />
-                          ),
+                          label: "Konfirmasi berhasil",
+                          desc: "Peserta mendapat akses kelas.",
+                          icon: CheckCircle,
+                          className:
+                            "peer-data-[state=checked]:border-emerald-500 peer-data-[state=checked]:bg-emerald-500/10",
                         },
                         {
                           id: "rejected",
-                          label: "Ditolak",
-                          icon: (
-                            <XCircle className="w-6 h-6 text-red-500 mb-2" />
-                          ),
+                          label: "Tolak pembayaran",
+                          desc: "Peserta perlu mengunggah bukti baru.",
+                          icon: XCircle,
+                          className:
+                            "peer-data-[state=checked]:border-destructive peer-data-[state=checked]:bg-destructive/10",
                         },
-                      ].map((item) => (
-                        <div key={item.id}>
-                          <RadioGroupItem
-                            value={item.id}
-                            id={item.id}
-                            className="peer sr-only"
-                          />
-                          <Label
-                            htmlFor={item.id}
-                            className="h-full min-h-[120px] flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-background p-4 text-center cursor-pointer transition-all duration-200 hover:bg-muted/60 peer-data-[state=checked]:border-primary"
-                          >
-                            {item.icon}
-                            <span className="text-sm font-medium">
-                              {item.label}
-                            </span>
-                          </Label>
-                        </div>
-                      ))}
+                      ].map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <div key={item.id}>
+                            <RadioGroupItem
+                              value={item.id}
+                              id={item.id}
+                              className="peer sr-only"
+                            />
+                            <Label
+                              htmlFor={item.id}
+                              className={cn(
+                                "flex cursor-pointer items-start gap-3 rounded-md border bg-background p-4 transition hover:bg-muted/50",
+                                item.className,
+                              )}
+                            >
+                              <Icon className="mt-0.5 size-5 shrink-0 text-primary" />
+                              <span>
+                                <span className="block text-sm font-bold">
+                                  {item.label}
+                                </span>
+                                <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                                  {item.desc}
+                                </span>
+                              </span>
+                            </Label>
+                          </div>
+                        );
+                      })}
                     </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </CardContent>
 
-          <CardFooter>
             <Button
-              variant={"orange"}
               type="submit"
               disabled={isPending || isFetching}
-              className="w-full md:w-fit"
+              className="mt-5 w-full"
             >
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menyimpan...
+                  <Loader2 className="animate-spin" />
+                  Menyimpan
                 </>
               ) : (
-                "Simpan Perubahan"
+                <>
+                  <FileCheck2 />
+                  Simpan Konfirmasi
+                </>
               )}
             </Button>
-          </CardFooter>
-        </Card>
+          </section>
+        </aside>
       </form>
     </Form>
+  );
+}
+
+function InfoBlock({
+  icon: Icon,
+  label,
+  value,
+  strong,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  strong?: boolean;
+}) {
+  return (
+    <div className="rounded-md border bg-background p-4">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        <Icon className="size-4 text-primary" />
+        {label}
+      </div>
+      <p
+        className={cn(
+          "mt-2 break-words text-sm font-semibold",
+          strong && "text-xl font-extrabold text-primary",
+        )}
+      >
+        {value}
+      </p>
+    </div>
   );
 }

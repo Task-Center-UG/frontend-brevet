@@ -3,6 +3,7 @@ import FeaturedCourses from "@/components/(main)/featured-courses";
 import FeaturedPrograms from "@/components/(main)/featured-programs";
 import Footer from "@/components/(main)/footer";
 import Hero from "@/components/(main)/hero";
+import LearnerCentricSections from "@/components/(main)/learner-centric-sections";
 import MarqueeBand from "@/components/(main)/marquee-band";
 import Navbar from "@/components/(main)/navbar";
 import Pricing from "@/components/(main)/priccing";
@@ -15,6 +16,7 @@ const HomePage = () => {
       <main>
         <Hero />
         <MarqueeBand />
+        <LearnerCentricSections />
         <FeaturedPrograms />
         <FeaturedCourses />
         <Pricing />

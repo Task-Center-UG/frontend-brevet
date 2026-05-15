@@ -1,6 +1,12 @@
 export const navLinks = {
   about: [
     {
+      title: "Tentang Kami",
+      href: "/tentang-kami",
+      description:
+        "Kenali fitur LMS Brevet dan alur belajar untuk peserta, guru, dan admin.",
+    },
+    {
       title: "Kontak",
       href: "https://wa.me/6285141760017",
       description: "Hubungi kami untuk informasi lebih lanjut atau bantuan.",

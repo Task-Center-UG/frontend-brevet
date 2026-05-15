@@ -11,7 +11,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { Clock4, Repeat2, CheckCircle2, Info } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock4,
+  ExternalLink,
+  Eye,
+  Info,
+  Paperclip,
+  Repeat2,
+  Trash2,
+} from "lucide-react";
 import { format, formatDistanceToNowStrict, isAfter, isBefore } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import * as React from "react";
@@ -20,6 +30,7 @@ import {
   TAssignmentSubmission,
 } from "./_types/submission-type";
 import { useDeleteData } from "@/hooks/use-delete-data";
+import { toAssetUrl } from "@/helpers/api-config";
 import { chip, clamp, formatWIB, pill } from "./_utils/utils";
 import {
   Dialog,
@@ -50,7 +61,7 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
       ?.slice()
       .sort(
         (a, b) =>
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       )
       .map((s) => ({
         ...s,
@@ -132,11 +143,14 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
 
   return (
     <>
-      <Card className="w-full rounded-xl border shadow-sm overflow-hidden">
-        <div className="h-1.5 w-full bg-primary" />
+      <Card className="w-full overflow-hidden rounded-lg border shadow-sm">
+        <div className="h-1 w-full bg-primary" />
         <CardHeader className="p-5 md:p-6 border-b">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-0.5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                Ruang Tugas
+              </p>
               <CardTitle className="text-lg md:text-xl font-semibold tracking-tight">
                 {assignment.title}
               </CardTitle>
@@ -252,10 +266,10 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
                   return (
                     <li
                       key={s.id}
-                      className="flex flex-col gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-md border bg-muted/30 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
                     >
                       <span className="text-foreground">
-                        Percobaan {i + 1} •{" "}
+                        Percobaan {i + 1} -{" "}
                         {format(new Date(s.created_at), "dd MMM yyyy, HH:mm", {
                           locale: localeID,
                         })}{" "}
@@ -275,11 +289,13 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
                         <Button
                           variant="outline"
                           size="sm"
+                          className="gap-2"
                           onClick={() => {
                             setSelectedSubmission(s);
                             setOpenDialog(true);
                           }}
                         >
+                          <Eye className="size-4" />
                           Lihat Jawaban
                         </Button>
 
@@ -291,6 +307,7 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
                               asChild
                             >
                               <Link
+                                className="gap-2"
                                 href={`/dashboard/program-saya/${batchSlug}/tugas/${assignmentId}/jawaban/${latest?.id}`}
                               >
                                 Ubah Jawaban
@@ -311,7 +328,7 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
             </>
           )}
 
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-wrap gap-2 pt-1">
             {open && attemptsUsed < attemptsAllowed ? (
               <Button variant="orange" asChild>
                 <Link href={actionHref}>
@@ -320,7 +337,10 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
               </Button>
             ) : (
               <Button variant="outline" asChild>
-                <Link href={goBackHref}>Kembali ke Kursus</Link>
+                <Link href={goBackHref} className="gap-2">
+                  <ArrowLeft className="size-4" />
+                  Kembali ke Kursus
+                </Link>
               </Button>
             )}
           </div>
@@ -367,15 +387,20 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
                       return (
                         <div
                           key={f.id}
-                          className="flex items-center justify-between gap-2"
+                          className="flex items-center justify-between gap-3 rounded-md border bg-muted/30 p-3"
                         >
-                          <span className="text-sm">{filename}</span>
+                          <span className="inline-flex min-w-0 items-center gap-2 text-sm">
+                            <Paperclip className="size-4 shrink-0 text-primary" />
+                            <span className="truncate">{filename}</span>
+                          </span>
                           <Button asChild size="sm" variant="secondary">
                             <a
-                              href={f.file_url}
+                              className="gap-2"
+                              href={toAssetUrl(f.file_url)}
                               target="_blank"
                               rel="noreferrer"
                             >
+                              <ExternalLink className="size-4" />
                               Buka Lampiran
                             </a>
                           </Button>
@@ -407,7 +432,7 @@ const PengumpulanKonfirmasi = ({ batchSlug, assignmentId }: Props) => {
 
 function isEssayView(
   parentAssignmentType: string | undefined,
-  sub: TAssignmentSubmission
+  sub: TAssignmentSubmission,
 ) {
   const parentIsEssay = (parentAssignmentType || "").toLowerCase() === "essay";
   const hasEssay =
@@ -433,10 +458,11 @@ function DeleteSubmissionDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className="text-white"
+          className="gap-2 text-white"
           variant="destructive"
           disabled={disabled}
         >
+          <Trash2 className="size-4" />
           Hapus
         </Button>
       </DialogTrigger>

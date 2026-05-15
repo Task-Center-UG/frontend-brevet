@@ -22,7 +22,7 @@ import {
 import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { format, formatDistanceToNowStrict, isAfter, isBefore } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import Link from "next/link";
@@ -97,10 +97,14 @@ const UpdatePengumpulanEssay = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-        <Card>
+        <Card className="overflow-hidden rounded-lg">
+          <div className="h-1 w-full bg-primary" />
           <CardHeader>
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  Ubah Jawaban
+                </p>
                 <CardTitle className="text-base">{assignment.title}</CardTitle>
                 {assignment.description && (
                   <CardDescription className="mt-1">
@@ -135,7 +139,7 @@ const UpdatePengumpulanEssay = ({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-lg">
           <CardHeader>
             <CardTitle>Perbarui Jawaban (Esai)</CardTitle>
             <CardDescription>
@@ -153,7 +157,7 @@ const UpdatePengumpulanEssay = ({
                     <MinimalTiptapEditor
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder="Tulis revisi jawaban kamu…"
+                      placeholder="Tulis revisi jawaban kamu..."
                       editable={!patch.isPending && open}
                       output="html"
                       className="w-full max-w-full overflow-hidden"
@@ -169,25 +173,31 @@ const UpdatePengumpulanEssay = ({
             <Button
               type="submit"
               variant="orange"
+              className="gap-2 text-white"
               disabled={patch.isPending || !open}
             >
               {patch.isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menyimpan…
+                  <Loader2 className="size-4 animate-spin" />
+                  Menyimpan...
                 </>
               ) : closed ? (
                 "Tugas Ditutup"
               ) : notStarted ? (
                 "Belum Dibuka"
               ) : (
-                "Simpan Perubahan"
+                <>
+                  <Save className="size-4" />
+                  Simpan Perubahan
+                </>
               )}
             </Button>
             <Button variant="outline" asChild>
               <Link
+                className="gap-2"
                 href={`/dashboard/program-saya/${batchSlug}/tugas/${assignmentId}`}
               >
+                <ArrowLeft className="size-4" />
                 Batal
               </Link>
             </Button>

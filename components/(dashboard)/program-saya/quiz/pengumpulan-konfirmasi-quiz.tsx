@@ -15,12 +15,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  ArrowLeft,
   Clock4,
   CheckCircle2,
   Info,
   Timer,
   ClipboardCheck,
   FileText,
+  PlayCircle,
 } from "lucide-react";
 import { formatDistanceToNowStrict, isAfter, isBefore } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -206,7 +208,7 @@ export default function PengumpulanKonfirmasiQuiz({
             async (att): Promise<readonly [string, TAttemptResult | null]> => {
               try {
                 const res = await axiosInstance.get<TAttemptResultResp>(
-                  `/quizzes/attempts/${att.id}/result`
+                  `/quizzes/attempts/${att.id}/result`,
                 );
                 const payload = res.data?.data;
                 if (isAttemptResult(payload)) {
@@ -216,8 +218,8 @@ export default function PengumpulanKonfirmasiQuiz({
               } catch {
                 return [att.id, null] as const;
               }
-            }
-          )
+            },
+          ),
         );
         if (cancelled) return;
         const map: Record<string, TAttemptResult | null> = {};
@@ -265,7 +267,7 @@ export default function PengumpulanKonfirmasiQuiz({
     !isPlainObject(data) ||
     !isPlainObject((data as Record<string, unknown>).data) ||
     !isPlainObject(
-      ((data as Record<string, unknown>).data as Record<string, unknown>).data
+      ((data as Record<string, unknown>).data as Record<string, unknown>).data,
     )
   ) {
     return <div className="text-sm text-destructive">Gagal memuat quiz.</div>;
@@ -333,13 +335,13 @@ export default function PengumpulanKonfirmasiQuiz({
           const id = extractAttemptId(res);
           if (id) {
             router.push(
-              `/dashboard/program-saya/${batchSlug}/quiz/${quizId}/kerjakan/${id}`
+              `/dashboard/program-saya/${batchSlug}/quiz/${quizId}/kerjakan/${id}`,
             );
           } else {
             router.push(`/dashboard/program-saya/${batchSlug}/quiz/${quizId}`);
           }
         },
-      }
+      },
     );
   };
 
@@ -350,11 +352,14 @@ export default function PengumpulanKonfirmasiQuiz({
   });
 
   return (
-    <Card className="w-full rounded-xl border shadow-sm overflow-hidden">
-      <div className="h-1.5 w-full bg-primary" />
+    <Card className="w-full overflow-hidden rounded-lg border shadow-sm">
+      <div className="h-1 w-full bg-primary" />
       <CardHeader className="p-5 md:p-6 border-b">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-0.5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              Ruang Quiz
+            </p>
             <CardTitle className="text-lg md:text-xl font-semibold tracking-tight">
               {quiz.title}
             </CardTitle>
@@ -366,7 +371,7 @@ export default function PengumpulanKonfirmasiQuiz({
           </div>
           <span
             className={pill(
-              notStarted ? "notStarted" : open ? "open" : "closed"
+              notStarted ? "notStarted" : open ? "open" : "closed",
             )}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-current/70" />
@@ -450,7 +455,7 @@ export default function PengumpulanKonfirmasiQuiz({
         <div className="flex gap-2 pt-1">
           <Button
             variant={canInteract ? "orange" : "outline"}
-            className={canInteract ? "text-white" : ""}
+            className={canInteract ? "gap-2 text-white" : "gap-2"}
             disabled={!canInteract || isStarting}
             onClick={handleClick}
             title={
@@ -465,6 +470,7 @@ export default function PengumpulanKonfirmasiQuiz({
                       : "Ditutup"
             }
           >
+            <PlayCircle className="size-4" />
             {hasActiveAttempt
               ? btnLabel
               : reachedMax
@@ -473,7 +479,10 @@ export default function PengumpulanKonfirmasiQuiz({
           </Button>
 
           <Button variant="outline" asChild>
-            <Link href={goBackHref}>Kembali ke Kursus</Link>
+            <Link href={goBackHref} className="gap-2">
+              <ArrowLeft className="size-4" />
+              Kembali ke Kursus
+            </Link>
           </Button>
         </div>
 
@@ -549,12 +558,12 @@ export default function PengumpulanKonfirmasiQuiz({
                               </span>
                               <span className="text-xs text-muted-foreground">
                                 Benar {result.correct_answers}/
-                                {result.total_questions} • Salah{" "}
+                                {result.total_questions} - Salah{" "}
                                 {result.wrong_answers}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-muted-foreground">-</span>
                           )}
                         </td>
                         <td className="px-3 py-2">
@@ -565,14 +574,14 @@ export default function PengumpulanKonfirmasiQuiz({
                               className="text-white"
                               onClick={() =>
                                 router.push(
-                                  `/dashboard/program-saya/${batchSlug}/quiz/${quizId}/kerjakan/${att.id}`
+                                  `/dashboard/program-saya/${batchSlug}/quiz/${quizId}/kerjakan/${att.id}`,
                                 )
                               }
                             >
                               Lanjutkan
                             </Button>
                           ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-muted-foreground">-</span>
                           )}
                         </td>
                       </tr>

@@ -24,11 +24,12 @@ import {
 import FileInput from "@/components/ui/file-input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Loader2, Paperclip } from "lucide-react";
+import { ArrowLeft, Loader2, Paperclip, Save } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, formatDistanceToNowStrict, isAfter, isBefore } from "date-fns";
 import { id as localeID } from "date-fns/locale";
+import { toAssetUrl } from "@/helpers/api-config";
 import type { TAssignmentSubmission } from "./_types/submission-type";
 import {
   AssignmentFileAnswerFormData,
@@ -110,7 +111,7 @@ const UpdatePengumpulanFile = ({
       const newUrls = prev.filter((_, i) => i !== index);
       const current = form.getValues("files") as (string | File)[];
       const updated = current.filter((item) =>
-        typeof item === "string" ? newUrls.includes(item) : true
+        typeof item === "string" ? newUrls.includes(item) : true,
       );
       form.setValue("files", updated, {
         shouldDirty: true,
@@ -146,10 +147,14 @@ const UpdatePengumpulanFile = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-        <Card>
+        <Card className="overflow-hidden rounded-lg">
+          <div className="h-1 w-full bg-primary" />
           <CardHeader>
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  Ubah Jawaban
+                </p>
                 <CardTitle className="text-base">{assignment.title}</CardTitle>
                 {assignment.description && (
                   <CardDescription className="mt-1">
@@ -191,7 +196,7 @@ const UpdatePengumpulanFile = ({
                   {assignment.assignment_files.map((f, i) => (
                     <li key={f.id}>
                       <Link
-                        href={f.file_url}
+                        href={toAssetUrl(f.file_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs hover:bg-muted"
@@ -209,7 +214,7 @@ const UpdatePengumpulanFile = ({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-lg">
           <CardHeader>
             <CardTitle>Perbarui Jawaban (File)</CardTitle>
             <CardDescription>
@@ -250,27 +255,32 @@ const UpdatePengumpulanFile = ({
             <Button
               type="submit"
               variant="orange"
-              className="min-w-40"
+              className="min-w-40 gap-2 text-white"
               disabled={patchSubmission.isPending || !open}
             >
               {patchSubmission.isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Menyimpan…
+                  <Loader2 className="size-4 animate-spin" />
+                  Menyimpan...
                 </>
               ) : closed ? (
                 "Tugas Ditutup"
               ) : notStarted ? (
                 "Belum Dibuka"
               ) : (
-                "Simpan Perubahan"
+                <>
+                  <Save className="size-4" />
+                  Simpan Perubahan
+                </>
               )}
             </Button>
 
             <Button variant="outline" asChild>
               <Link
+                className="gap-2"
                 href={`/dashboard/program-saya/${batchSlug}/tugas/${assignmentId}`}
               >
+                <ArrowLeft className="size-4" />
                 Batal
               </Link>
             </Button>

@@ -21,7 +21,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, Clock4, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Clock4,
+  Send,
+} from "lucide-react";
 
 type Props = {
   batchSlug: string;
@@ -181,8 +188,8 @@ export default function QuizAttempt({ batchSlug, quizId, attemptId }: Props) {
 
   if (isLoading) {
     return (
-      <Card className="w-full rounded-xl border shadow-sm overflow-hidden">
-        <div className="h-1.5 w-full bg-primary" />
+      <Card className="w-full overflow-hidden rounded-lg border shadow-sm">
+        <div className="h-1 w-full bg-primary" />
         <CardHeader className="p-5 md:p-6 border-b">
           <Skeleton className="h-6 w-52 mb-2" />
           <Skeleton className="h-4 w-96" />
@@ -227,11 +234,14 @@ export default function QuizAttempt({ batchSlug, quizId, attemptId }: Props) {
 
   return (
     <>
-      <Card className="w-full rounded-xl border shadow-sm overflow-hidden">
-        <div className="h-1.5 w-full bg-primary" />
+      <Card className="w-full overflow-hidden rounded-lg border shadow-sm">
+        <div className="h-1 w-full bg-primary" />
         <CardHeader className="p-5 md:p-6 border-b">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-0.5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                Kerjakan Quiz
+              </p>
               <CardTitle className="text-lg md:text-xl font-semibold tracking-tight">
                 {quiz.title}
               </CardTitle>
@@ -257,7 +267,7 @@ export default function QuizAttempt({ batchSlug, quizId, attemptId }: Props) {
                 Soal {index + 1} dari {total}
               </div>
 
-              <div className="rounded-xl border bg-muted/20 p-4">
+              <div className="rounded-lg border bg-muted/20 p-4">
                 <p className="text-[15px] leading-relaxed">
                   {current?.question}
                 </p>
@@ -271,7 +281,7 @@ export default function QuizAttempt({ batchSlug, quizId, attemptId }: Props) {
                       key={op.id}
                       disabled={ended}
                       onClick={() => onChoose(current!, op)}
-                      className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition
+                      className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition
                         ${selected ? "border-green-600 bg-green-500/10" : "hover:bg-muted"}
                         ${ended ? "opacity-60 cursor-not-allowed" : ""}`}
                     >
@@ -308,7 +318,7 @@ export default function QuizAttempt({ batchSlug, quizId, attemptId }: Props) {
             </section>
 
             <aside className="space-y-3">
-              <p className="text-sm font-medium">Quiz navigation</p>
+              <p className="text-sm font-medium">Navigasi Soal</p>
               <div className="grid grid-cols-5 gap-2">
                 {questions.map((q, i) => {
                   const answered = !!answers[q.id];
@@ -317,12 +327,15 @@ export default function QuizAttempt({ batchSlug, quizId, attemptId }: Props) {
                     <button
                       key={q.id}
                       onClick={() => goTo(i)}
-                      className={`h-10 rounded-md border text-sm font-medium transition
+                      className={`relative h-10 rounded-md border text-sm font-medium transition
                         ${isCurrent ? "ring-2 ring-primary" : ""}
                         ${answered ? "bg-green-500/15 border-green-500/30" : "bg-background hover:bg-muted"}`}
-                      title={`Soal ${i + 1}${answered ? " • sudah dijawab" : ""}`}
+                      title={`Soal ${i + 1}${answered ? " - sudah dijawab" : ""}`}
                     >
-                      {i + 1}
+                      <span>{i + 1}</span>
+                      {answered && (
+                        <CheckCircle2 className="absolute right-1 top-1 size-3 text-green-600" />
+                      )}
                     </button>
                   );
                 })}
@@ -330,11 +343,12 @@ export default function QuizAttempt({ batchSlug, quizId, attemptId }: Props) {
 
               <Button
                 variant="orange"
-                className="w-full text-white"
+                className="w-full gap-2 text-white"
                 disabled={!allAnswered || ended || finalSubmit.isPending}
                 onClick={() => setOpenDialog(true)}
               >
-                Kumpulkan quiz...
+                <Send className="size-4" />
+                Kumpulkan Quiz
               </Button>
 
               {!allAnswered && (

@@ -1,11 +1,12 @@
 "use client";
 
+import { FileText } from "lucide-react";
+
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetData } from "@/hooks/use-get-data";
-import React from "react";
 import { TAssignment } from "../../kelas/tugas/_types/tugas-type";
 import PengumpulanEssay from "./pengumpulan-essay";
 import PengumpulanFile from "./pengumpulan-file";
-import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
   batchSlug: string;
@@ -20,21 +21,16 @@ const PengumpulanJawaban = ({ batchSlug, assignmentId }: Props) => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="space-y-3">
-          <Skeleton className="h-6 w-[40%] max-w-[320px]" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-[85%]" />
-            <Skeleton className="h-4 w-[70%]" />
-          </div>
+      <div className="grid gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="rounded-lg border bg-card p-5">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="mt-4 h-20 w-full" />
+          <Skeleton className="mt-4 h-10 w-full" />
         </div>
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-28 w-full" />
-          <div className="flex gap-2">
-            <Skeleton className="h-9 w-28" />
-            <Skeleton className="h-9 w-28" />
-          </div>
+        <div className="rounded-lg border bg-card p-5">
+          <Skeleton className="h-5 w-56" />
+          <Skeleton className="mt-4 h-64 w-full" />
+          <Skeleton className="mt-4 h-10 w-40" />
         </div>
       </div>
     );
@@ -42,24 +38,26 @@ const PengumpulanJawaban = ({ batchSlug, assignmentId }: Props) => {
 
   if (isError) {
     return (
-      <div className="text-sm text-destructive">Gagal memuat data tugas.</div>
+      <div className="rounded-lg border bg-card p-6 text-sm text-destructive">
+        Gagal memuat data tugas.
+      </div>
     );
   }
 
   const tugas: TAssignment | undefined = data?.data?.data;
-  if (!tugas) return <div>Data tugas tidak ditemukan.</div>;
+  if (!tugas) {
+    return (
+      <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+        <FileText className="mb-3 size-5 text-primary" />
+        Data tugas tidak ditemukan.
+      </div>
+    );
+  }
 
-  return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">{tugas.title}</h2>
-      <p className="text-sm text-muted-foreground">{tugas.description}</p>
-
-      {tugas.type === "essay" ? (
-        <PengumpulanEssay batchSlug={batchSlug} assignment={tugas} />
-      ) : (
-        <PengumpulanFile batchSlug={batchSlug} assignment={tugas} />
-      )}
-    </div>
+  return tugas.type === "essay" ? (
+    <PengumpulanEssay batchSlug={batchSlug} assignment={tugas} />
+  ) : (
+    <PengumpulanFile batchSlug={batchSlug} assignment={tugas} />
   );
 };
 

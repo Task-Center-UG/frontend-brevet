@@ -11,7 +11,7 @@ import {
 export function TrustSection() {
   return (
     <MotionSection className="border-b py-24 md:py-32">
-      <div className="mx-auto grid max-w-screen-xl gap-12 px-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-start">
+      <div className="mx-auto grid max-w-screen-xl gap-12 px-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-center">
         <SectionReveal>
           <SectionEyebrow>Rasa aman</SectionEyebrow>
           <h2 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-normal md:text-5xl">
@@ -27,8 +27,7 @@ export function TrustSection() {
           delay={0.1}
           className="rounded-lg border bg-card p-6 transition-colors hover:border-primary/30"
         >
-          <BadgeCheck className="size-6 text-primary" />
-          <div className="mt-6 grid gap-4">
+          <div className="grid gap-4">
             {trustPoints.map((item, index) => (
               <MicroCard
                 key={item}

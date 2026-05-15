@@ -12,7 +12,7 @@ import {
 export function HeroSection() {
   return (
     <MotionSection className="border-b bg-[linear-gradient(135deg,oklch(0.985_0.006_78),oklch(0.955_0.01_86))] py-24 dark:bg-[linear-gradient(135deg,oklch(0.16_0.012_285),oklch(0.21_0.014_285))] md:py-32">
-      <div className="mx-auto grid max-w-screen-xl gap-12 px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
+      <div className="mx-auto grid max-w-screen-xl gap-12 px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
         <SectionReveal>
           <SectionEyebrow>Tentang LMS Brevet</SectionEyebrow>
           <h1 className="mt-6 max-w-4xl text-[2.75rem] font-extrabold leading-[0.98] tracking-normal md:text-[4.5rem] lg:text-[5.6rem]">

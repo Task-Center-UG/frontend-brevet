@@ -1,4 +1,4 @@
-import { BadgeCheck, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 import { trustPoints } from "./about-data";
 import {

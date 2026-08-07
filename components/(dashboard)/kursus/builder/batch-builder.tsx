@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -14,6 +14,7 @@ import {
   ListChecks,
   Plus,
   Route,
+  Trash2,
 } from "lucide-react";
 
 import NilaiDatatable from "@/components/(dashboard)/kelas/nilai/nilai-datatable";
@@ -26,8 +27,18 @@ import TugasDataTable from "@/components/(dashboard)/kursus/gelombang/pertemuan/
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDeleteData } from "@/hooks/use-delete-data";
 import { useGetData } from "@/hooks/use-get-data";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +89,7 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { data: batchResp, isLoading: isLoadingBatch } = useGetData({
     queryKey: ["batch-builder-batch", batchSlug],
@@ -94,6 +106,12 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
   const meetings = useMemo(() => meetingsData ?? [], [meetingsData]);
   const isLoading = isLoadingBatch || isLoadingMeetings;
   const searchParamsString = searchParams.toString();
+  const deleteBatch = useDeleteData({
+    queryKey: "batches",
+    dataProtected: `batches/${batch?.id ?? batchSlug}`,
+    backUrl: `/dashboard/kursus/${courseSlug}/builder?tab=gelombang`,
+    successMessage: "Gelombang berhasil dihapus!",
+  });
 
   const rawTab = searchParams.get("tab");
   const activeTab: BuilderTab = isBuilderTab(rawTab) ? rawTab : "pertemuan";
@@ -197,6 +215,51 @@ export function BatchBuilder({ courseSlug, batchSlug }: Props) {
                 Ubah Batch
               </Link>
             </Button>
+            <Dialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="gap-2 text-white"
+                  disabled={!batch?.id || deleteBatch.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Hapus Gelombang
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[400px]">
+                <DialogHeader>
+                  <DialogTitle>Konfirmasi Hapus</DialogTitle>
+                  <DialogDescription>
+                    Apakah kamu yakin ingin menghapus gelombang ini?
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setDeleteDialogOpen(false)}
+                    disabled={deleteBatch.isPending}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="text-white"
+                    disabled={!batch?.id || deleteBatch.isPending}
+                    onClick={() => {
+                      deleteBatch.mutate(undefined, {
+                        onSuccess: () => setDeleteDialogOpen(false),
+                      });
+                    }}
+                  >
+                    {deleteBatch.isPending ? "Menghapus..." : "Hapus"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             {addHrefByTab[activeTab] && selectedMeetingId && (
               <Button variant="orange" size="sm" className="gap-2" asChild>
                 <Link href={addHrefByTab[activeTab]}>
